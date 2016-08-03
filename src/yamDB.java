@@ -14,6 +14,7 @@ import javax.swing.JTextField;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.ButtonGroup;
+import javax.swing.ButtonModel;
 import javax.swing.DefaultListModel;
 import javax.swing.border.EmptyBorder;
 import java.awt.Insets;
@@ -29,6 +30,10 @@ import java.util.ArrayList;
 public class yamDB {
 
 	private JFrame frame;
+	private ButtonGroup menuButtonGroup;
+	private JRadioButton searchButton;
+	private JRadioButton rouleteButton;
+	private JRadioButton predictorButton;
 	private JTextField jtxtFieldName;
 	private JTextField jtxtFieldActor;
 	private JTextField jtxtFieldYearFrom;
@@ -82,14 +87,23 @@ public class yamDB {
 		JPanel innerPan1 = new JPanel();
 		innerPan1.setLayout(new BoxLayout(innerPan1, BoxLayout.X_AXIS));
 		JLabel radiolb = new JLabel("I WANT TO  ");
-		JRadioButton searchButton = new JRadioButton(" SEARCH");
+		
+		menuButtonGroup = new ButtonGroup();
+		
+		searchButton = new JRadioButton(" SEARCH");
 		searchButton.setSelected(true);
-		JRadioButton rouleteButton = new JRadioButton(" PLAY ROULETTE");
-		JRadioButton predictorButton = new JRadioButton(" USE PREDICTOR");
+		rouleteButton = new JRadioButton(" PLAY ROULETTE");
+		predictorButton = new JRadioButton(" USE PREDICTOR");
 		innerPan1.add(radiolb);
+		
+		menuButtonGroup.add(searchButton);
+		menuButtonGroup.add(rouleteButton);
+		menuButtonGroup.add(predictorButton);
+		
 		innerPan1.add(searchButton);
 		innerPan1.add(rouleteButton);
 		innerPan1.add(predictorButton);
+		
 		/*searchButton.addActionListener(this);
 	    rouleteButton.addActionListener(this);
 	    predictorButton.addActionListener(this);
@@ -159,7 +173,10 @@ public class yamDB {
 		innerPan5.setLayout(new BoxLayout(innerPan5, BoxLayout.X_AXIS));	
 		JLabel genrelb = new JLabel("Genre  ");
 		JComboBox genre = new JComboBox();
-		String[] genres = new String[] {"Drama", "Comedy", "Thriller", "Horror"};
+		String[] genres = new String[] {"Short", "Drama", "Comedy", "Documentary", "Adult", "Action", "Thriller",
+				"Romance", "Animation", "Family", "Horror", "Music", "Crime", "Adventure", "Fantasy", "Sci-Fi",
+				"Mystery", "Biography", "History", "Sport", "Musical", "War", "Western", "Reality-TV", "News",
+				"Talk-Show", "Game-Show", "Film-Noir", "Lifestyle" , "Experimental", "Erotica", "Commercial"};
 		JComboBox<String> genresList = new JComboBox<>(genres);
 		innerPan5.add(genrelb);
 		innerPan5.add(genresList);
@@ -234,33 +251,36 @@ public class yamDB {
 				Connection myCon = DriverManager.getConnection("jdbc:mysql://yamdb.ddns.net/yamdb?useSSL=false", "devs", "P@ssw0rd"); // replace world with the name of your database, put your password in ""
 				//2. Create a statement
 				Statement myStmt = myCon.createStatement();
+				
 				//3 Execute SQl query
 				String name = jtxtFieldName.getText();
 				String date = jtxtFieldYearFrom.getText();
 				String rank = null;
 				String votes = null;
+				String startYear = jtxtFieldYearFrom.getText();
+				String endYear = jtxtFieldYearTo.getText();
+				
+				String query = "";
+				if(searchButton.isSelected()) {
+					query = createSearchQuery(name, date, rank, votes);
+				}
+				else if (rouleteButton.isSelected()) {
+					query = createRouletteQuery();
+				}
+				else if (predictorButton.isSelected()) {
+					query = createPredictorQuery();
+				}
+
+
 				/*String query = "select * from test WHERE name = ?";
      			PreparedStatement pst = (PreparedStatement) myCon.prepareStatement(query);
      			pst.setString(1, "%" + searchText + "%");
      			ResultSet rs = pst.executeQuery();*/
-				String searchStatement = "select * from Ratings";
-				//also search date if we were sent one
 				String outputString = "";
-				boolean nothingToSearch = false;
-				if(date.length() == 4 && (name.length() > 0 && name != null)) {
-					searchStatement += " WHERE Title = '" + name + "' AND Year = '" + date + "'";
-				}
-				else if(date.length() == 4) {
-					searchStatement += " WHERE Year = '" + date + "'";
-				}
-				else if(name.length() > 0 && name != null) {
-					searchStatement += " WHERE Title = '" + name + "'";
-				}
-				else {
-					nothingToSearch = true;
-					outputString = "Sorry, I didn't recieve valid information to search. Check your date or title.";
-				}
-				ResultSet rs = myStmt.executeQuery(searchStatement);	
+				ResultSet rs = null;
+				
+				rs = myStmt.executeQuery(query);
+				
 				//4 Process the result set
 				String previousOutput = "";
 				int n = 1;
@@ -270,10 +290,10 @@ public class yamDB {
 					date = rs.getString("Year").substring(0, 4);
 					rank = rs.getString("Rank");
 					votes = rs.getString("Votes");
-					if(!nothingToSearch) {
-						outputString = n + ". Movie Title: " + name + "    Release Date: " + date + "    Rating: " + rank + "    Votes: " + votes;
-						n++;
-					}
+					
+					outputString = n + ". Movie Title: " + name + "    Release Date: " + date + "    Rating: " + rank + "    Votes: " + votes;
+					n++;
+					
 					if(!outputString.equals(previousOutput)) {
 						model.addElement(outputString);
 						previousOutput = outputString;
@@ -284,9 +304,38 @@ public class yamDB {
      	            }*/
 			} 
 			catch (SQLException g) {
-				// TODO Auto-generated catch block
+				System.err.println("Yo' Shit Didn't Run Main! You need to find this code and fix it up real good!!!");
 				g.printStackTrace();
 			}
+		}
+
+		//Generates a SQL search query (goal to find movies that match the stuff they put in) and returns that string
+		private String createSearchQuery(String name, String date, String rank, String votes) {
+			String searchStatement = "select * from Ratings";
+			//also search date if we were sent one
+			if(date.length() == 4 && (name.length() > 0 && name != null)) {
+				searchStatement += " WHERE Title = '" + name + "' AND Year = '" + date + "'";
+			}
+			else if(date.length() == 4) {
+				searchStatement += " WHERE Year = '" + date + "'";
+			}
+			else if(name.length() > 0 && name != null) {
+				searchStatement += " WHERE Title = '" + name + "'";
+			}
+			return searchStatement;
+		}
+
+		//Generates a SQL Roulette query (goal being to give a specific movie recommendation) and returns that string
+		private String createRouletteQuery() {
+			// TODO Auto-generated method stub
+			return null;
+		}
+
+		//Generates a SQL Predictor query (goal being to have the user select an Actor OR a Production Company then also add
+		// year range they are interested in, to see
+		private String createPredictorQuery() {
+			// TODO Auto-generated method stub
+			return null;
 		}
 	}
 }
