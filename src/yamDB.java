@@ -30,16 +30,19 @@ import java.util.ArrayList;
 public class yamDB {
 
 	private JFrame frame;
-	private ButtonGroup menuButtonGroup;
-	private JRadioButton searchButton;
-	private JRadioButton rouleteButton;
-	private JRadioButton predictorButton;
-	private JTextField jtxtFieldName;
-	private JTextField jtxtFieldActor;
-	private JTextField jtxtFieldYearFrom;
-	private JTextField jtxtFieldYearTo;
-	private JButton btnSearch;
-	private DefaultListModel<String> model;
+	//private ButtonGroup menuButtonGroup;
+	private JRadioButton mySearchButton;
+	private JRadioButton myRouleteButton;
+	private JRadioButton myPredictorButton;
+	private JTextField myJtxtFieldName;
+	private JTextField myJtxtFieldActor;
+	private JTextField myJtxtFieldYearFrom;
+	private JTextField myJtxtFieldYearTo;
+	private JComboBox<String> myRatingsfrom;
+	private JComboBox<String> myRatingsto;
+	private JComboBox<String> myGenre;
+	private JButton myButtonSearch;
+	private DefaultListModel<String> myModel;
 
 	/**
 	 * Launch the application.
@@ -88,21 +91,21 @@ public class yamDB {
 		innerPan1.setLayout(new BoxLayout(innerPan1, BoxLayout.X_AXIS));
 		JLabel radiolb = new JLabel("I WANT TO  ");
 		
-		menuButtonGroup = new ButtonGroup();
+		ButtonGroup menuButtonGroup = new ButtonGroup();
 		
-		searchButton = new JRadioButton(" SEARCH");
-		searchButton.setSelected(true);
-		rouleteButton = new JRadioButton(" PLAY ROULETTE");
-		predictorButton = new JRadioButton(" USE PREDICTOR");
+		mySearchButton = new JRadioButton(" SEARCH");
+		mySearchButton.setSelected(true);
+		myRouleteButton = new JRadioButton(" PLAY ROULETTE");
+		myPredictorButton = new JRadioButton(" USE PREDICTOR");
 		innerPan1.add(radiolb);
 		
-		menuButtonGroup.add(searchButton);
-		menuButtonGroup.add(rouleteButton);
-		menuButtonGroup.add(predictorButton);
+		menuButtonGroup.add(mySearchButton);
+		menuButtonGroup.add(myRouleteButton);
+		menuButtonGroup.add(myPredictorButton);
 		
-		innerPan1.add(searchButton);
-		innerPan1.add(rouleteButton);
-		innerPan1.add(predictorButton);
+		innerPan1.add(mySearchButton);
+		innerPan1.add(myRouleteButton);
+		innerPan1.add(myPredictorButton);
 		
 		/*searchButton.addActionListener(this);
 	    rouleteButton.addActionListener(this);
@@ -116,82 +119,84 @@ public class yamDB {
 		JPanel innerPan = new JPanel();
 		innerPan.setLayout(new BoxLayout(innerPan, BoxLayout.X_AXIS));
 		JLabel lb1 = new JLabel("Movie Title  ");
-		jtxtFieldName = new JTextField();
+		myJtxtFieldName = new JTextField();
 		innerPan.add(lb1);
-		innerPan.add(jtxtFieldName);
+		innerPan.add(myJtxtFieldName);
 
 		//year from
 		JPanel innerPan2 = new JPanel();
 		innerPan2.setLayout(new BoxLayout(innerPan2, BoxLayout.X_AXIS));		
 		JLabel yearfromlb = new JLabel("Year From  ");
-		jtxtFieldYearFrom = new JTextField();
+		myJtxtFieldYearFrom = new JTextField();
 		innerPan2.add(yearfromlb);
-		innerPan2.add(jtxtFieldYearFrom);
+		innerPan2.add(myJtxtFieldYearFrom);
 
 		//year to
 		JLabel yeartolb = new JLabel("  To  ");
-		jtxtFieldYearTo = new JTextField();
+		myJtxtFieldYearTo = new JTextField();
 		innerPan2.add(yeartolb);
-		innerPan2.add(jtxtFieldYearTo);
+		innerPan2.add(myJtxtFieldYearTo);
 
 		//actor
 		JPanel innerPan3 = new JPanel();
 		innerPan3.setLayout(new BoxLayout(innerPan3, BoxLayout.X_AXIS));	
 		JLabel actorlb = new JLabel("Actor's Name  ");
-		jtxtFieldActor = new JTextField();
+		myJtxtFieldActor = new JTextField();
 		innerPan3.add(actorlb);
-		innerPan3.add(jtxtFieldActor);
+		innerPan3.add(myJtxtFieldActor);
+		myJtxtFieldActor.setEnabled(false);
 
 		//rating From
 		JPanel innerPan4 = new JPanel();
 		innerPan4.setLayout(new BoxLayout(innerPan4, BoxLayout.X_AXIS));	
 		JLabel ratingsfromlb = new JLabel("Rating From  ");
-		JComboBox ratingsfrom = new JComboBox();
-		ArrayList<Integer> ratingsfromList = new ArrayList();
-		ratingsfrom.addItem(" ");
-		for(int i = 1; i < 11; i++){
+		myRatingsfrom = new JComboBox<String>();
+		ArrayList<Integer> ratingsfromList = new ArrayList<Integer>();
+		myRatingsfrom.addItem(" ");
+		for(int i = 0; i < 11; i++){
 			ratingsfromList.add(i);
-			ratingsfrom.addItem(i);
+			myRatingsfrom.addItem(i + "");
 		}
+		
 		innerPan4.add(ratingsfromlb);
-		innerPan4.add(ratingsfrom);
+		innerPan4.add(myRatingsfrom);
 
 		//rating To
 		JLabel ratingstolb = new JLabel("  To  ");
-		JComboBox ratingsto = new JComboBox();
-		ArrayList<Integer> ratingstoList = new ArrayList();
-		ratingsto.addItem(" ");
+		myRatingsto = new JComboBox<String>();
+		ArrayList<Integer> ratingstoList = new ArrayList<Integer>();
+		myRatingsto.addItem(" ");
 		for(int i = 1; i < 11; i++){
 			ratingstoList.add(i);
-			ratingsto.addItem(i);
+			myRatingsto.addItem(i + "");
 		}
 		innerPan4.add(ratingstolb);
-		innerPan4.add(ratingsto);
+		innerPan4.add(myRatingsto);
 
 		// Genre
 		JPanel innerPan5 = new JPanel();
 		innerPan5.setLayout(new BoxLayout(innerPan5, BoxLayout.X_AXIS));	
 		JLabel genrelb = new JLabel("Genre  ");
-		JComboBox genre = new JComboBox();
-		String[] genres = new String[] {"Short", "Drama", "Comedy", "Documentary", "Adult", "Action", "Thriller",
+		myGenre = new JComboBox<String>();
+		String[] genres = new String[] {"Select Genre", "Short", "Drama", "Comedy", "Documentary", "Adult", "Action", "Thriller",
 				"Romance", "Animation", "Family", "Horror", "Music", "Crime", "Adventure", "Fantasy", "Sci-Fi",
 				"Mystery", "Biography", "History", "Sport", "Musical", "War", "Western", "Reality-TV", "News",
 				"Talk-Show", "Game-Show", "Film-Noir", "Lifestyle" , "Experimental", "Erotica", "Commercial"};
-		JComboBox<String> genresList = new JComboBox<>(genres);
+		myGenre = new JComboBox<>(genres);
 		innerPan5.add(genrelb);
-		innerPan5.add(genresList);
+		innerPan5.add(myGenre);
 
 		//search button
 		JPanel innerPan6 = new JPanel();
 		innerPan6.setLayout(new BorderLayout());
-		btnSearch = new JButton("Search");
+		myButtonSearch = new JButton("Search");
 		ActionHandler handler = new ActionHandler();
 
 		//listeners
-		btnSearch.addActionListener(handler);
-		jtxtFieldName.addActionListener(handler);
-		jtxtFieldYearFrom.addActionListener(handler);
-		innerPan6.add(btnSearch,BorderLayout.CENTER);
+		myButtonSearch.addActionListener(handler);
+		myJtxtFieldName.addActionListener(handler);
+		myJtxtFieldYearFrom.addActionListener(handler);
+		innerPan6.add(myButtonSearch,BorderLayout.CENTER);
 		
 		//Table
 		/*JTable movieTalbe = new JTable();
@@ -206,8 +211,8 @@ public class yamDB {
 		dtm.addRow(new Object[] {"Ghostbusters","2016","5.5"});
 		dtm.addRow(new Object[] {"Central Intelligence","2016","8.0"});*/
 		
-		model = new DefaultListModel<>();
-		JList list = new JList(model);
+		myModel = new DefaultListModel<>();
+		JList<String> list = new JList<String>(myModel);
 		panel.add(lbIcon);
 		panel.add(Box.createVerticalStrut(30));
 		panel.add(innerPan1);
@@ -244,7 +249,7 @@ public class yamDB {
 	public class ActionHandler implements ActionListener {
 		@Override
 		public void actionPerformed(ActionEvent e) {
-			model.removeAllElements();
+			myModel.removeAllElements();
 			try {
 				//1.Get connection to database
 				//Connection myCon = DriverManager.getConnection("jdbc:mysql://LocalHost/world", "root", "password"); // replace world with the name of your database, put your password in ""
@@ -253,22 +258,21 @@ public class yamDB {
 				Statement myStmt = myCon.createStatement();
 				
 				//3 Execute SQl query
-				String name = jtxtFieldName.getText();
-				String date = jtxtFieldYearFrom.getText();
-				String rank = null;
-				String votes = null;
-				String startYear = jtxtFieldYearFrom.getText();
-				String endYear = jtxtFieldYearTo.getText();
-				
-				String query = "";
-				if(searchButton.isSelected()) {
-					query = createSearchQuery(name, date, rank, votes);
+				String queryName = myJtxtFieldName.getText();
+				String queryStartYear = myJtxtFieldYearFrom.getText();
+				String queryEndYear = myJtxtFieldYearTo.getText();
+				String queryStartRank = (String) myRatingsfrom.getSelectedItem();
+				String queryEndRank = (String) myRatingsto.getSelectedItem();
+				String queryGenre = (String) myGenre.getSelectedItem();
+				String completedQuery = "";
+				if(mySearchButton.isSelected()) {
+					completedQuery = createSearchQuery(queryName, queryStartYear, queryEndYear, queryStartRank.trim(), queryEndRank.trim(), queryGenre);
 				}
-				else if (rouleteButton.isSelected()) {
-					query = createRouletteQuery();
+				else if (myRouleteButton.isSelected()) {
+					completedQuery = createRouletteQuery();
 				}
-				else if (predictorButton.isSelected()) {
-					query = createPredictorQuery();
+				else if (myPredictorButton.isSelected()) {
+					completedQuery = createPredictorQuery();
 				}
 
 
@@ -278,26 +282,40 @@ public class yamDB {
      			ResultSet rs = pst.executeQuery();*/
 				String outputString = "";
 				ResultSet rs = null;
-				
-				rs = myStmt.executeQuery(query);
+				System.out.println("Your SQL Query: " + completedQuery);
+				rs = myStmt.executeQuery(completedQuery);
 				
 				//4 Process the result set
-				String previousOutput = "";
+
 				int n = 1;
 				while(rs.next()) {
-					name = rs.getString("Title");
-					System.out.println(name);
-					date = rs.getString("Year").substring(0, 4);
-					rank = rs.getString("Rank");
-					votes = rs.getString("Votes");
 					
-					outputString = n + ". Movie Title: " + name + "    Release Date: " + date + "    Rating: " + rank + "    Votes: " + votes;
-					n++;
+					outputString = n + "";
 					
-					if(!outputString.equals(previousOutput)) {
-						model.addElement(outputString);
-						previousOutput = outputString;
+					String resultName = rs.getString("Title");
+					String resultYear = rs.getString("Year").substring(0, 4);
+					String resultRating = rs.getString("Rank");
+					String resultVotes = rs.getString("Votes");
+					//ONCE GENRE IS WORKING FOR SEARCH
+					//String genre = rs.getString("Genres");
+					
+					if(mySearchButton.isSelected()) {
+						outputString += ". Movie Title: " + resultName + "    Release Date: " + resultYear + "    Rating: " + resultRating + "    Votes: " + resultVotes;
 					}
+					else if (myRouleteButton.isSelected()) {
+						//This Sprint (Sprint 3)
+						//outputString +=
+						// TODO Auto-generated method stub
+					}
+					else if (myPredictorButton.isSelected()) {
+						//LAST SPRINT (SPRINT 4)
+						//outputString +=
+						// TODO Auto-generated method stub
+					}
+					
+					n++;
+					myModel.addElement(outputString);
+
 				}
 				/*if (searchText.equals(query)) {
      	            System.out.println("Searching names.."  + query);
@@ -309,24 +327,51 @@ public class yamDB {
 			}
 		}
 
+		//SELECT * FROM Ratings WHERE Year >= queryStartYear AND Year <= queryEndYear AND Rank >= queryStartRank AND Rank <= queryEndRank
+		
 		//Generates a SQL search query (goal to find movies that match the stuff they put in) and returns that string
-		private String createSearchQuery(String name, String date, String rank, String votes) {
-			String searchStatement = "select * from Ratings";
+		private String createSearchQuery(String name, String startYear, String endYear, String startRank, String endRank, String genre) {
+			String searchStatement = "SELECT Ratings.Title, Ratings.Year, Ratings.Rank, Ratings.Votes FROM Ratings";
+			String searchSpecifics = "";
 			//also search date if we were sent one
-			if(date.length() == 4 && (name.length() > 0 && name != null)) {
-				searchStatement += " WHERE Title = '" + name + "' AND Year = '" + date + "'";
+			String and = " AND";
+			
+			if(name.length() > 0) {
+				searchSpecifics += and + " Ratings.Title = '" + name + "'";
 			}
-			else if(date.length() == 4) {
-				searchStatement += " WHERE Year = '" + date + "'";
+			if(startYear.length() == 4) {
+				searchSpecifics += and + " Ratings.Year >= " + startYear;
 			}
-			else if(name.length() > 0 && name != null) {
-				searchStatement += " WHERE Title = '" + name + "'";
+			if(endYear.length() == 4) {
+				searchSpecifics += and + " Ratings.Year <= " + endYear;
 			}
+			if(startRank.length() > 0) {
+				searchSpecifics += and + " Ratings.Rank >= " + startRank;
+			}
+			if(endRank.length() > 0) {
+				searchSpecifics += and + " Ratings.Rank <= " + endRank;
+			}
+			if(genre != null && !genre.equals("Select Genre")) {
+				//I think this next line is nearly working, but it freezes... I don't know why... may just be too big? -David
+				//searchStatement = "SELECT Ratings.Title, Ratings.Year, Ratings.Rank, Ratings.Votes, Genres.Genres FROM Ratings INNER JOIN Genres";
+				//This Sprint (Sprint 3)
+				// TODO method stub
+				System.out.println("Genres isn't workign here yet, but you chose: " + genre);
+			}
+
+			//SELECT Ratings.Title, Ratings.Rank, Ratings.Votes, Ratings.Year, Genres.Genres FROM
+			//Ratings INNER JOIN Genres Where Ratings.Year >= 1992 AND Ratings.Year <= 1995 AND
+			//Ratings.Rank >= 8 AND Ratings.Rank <= 10
+			if(searchSpecifics.length() > 0) {
+				searchStatement += " WHERE" + searchSpecifics.substring(and.length(), searchSpecifics.length()) + ";";
+			}
+			
 			return searchStatement;
 		}
 
 		//Generates a SQL Roulette query (goal being to give a specific movie recommendation) and returns that string
 		private String createRouletteQuery() {
+			//This Sprint (Sprint 3)
 			// TODO Auto-generated method stub
 			return null;
 		}
@@ -334,6 +379,7 @@ public class yamDB {
 		//Generates a SQL Predictor query (goal being to have the user select an Actor OR a Production Company then also add
 		// year range they are interested in, to see
 		private String createPredictorQuery() {
+			//LAST SPRINT (SPRINT 4)
 			// TODO Auto-generated method stub
 			return null;
 		}
