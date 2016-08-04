@@ -286,25 +286,36 @@ public class yamDB {
 				rs = myStmt.executeQuery(completedQuery);
 				
 				//4 Process the result set
-				String previousOutput = "";
+
 				int n = 1;
 				while(rs.next()) {
-
-					String nameqqq = rs.getString("Title");
-					String dateqqq = rs.getString("Year").substring(0, 4);
-					String rankqqq = rs.getString("Rank");
-					String votesqqq = rs.getString("Votes");
 					
+					outputString = n + "";
+					
+					String resultName = rs.getString("Title");
+					String resultYear = rs.getString("Year").substring(0, 4);
+					String resultRating = rs.getString("Rank");
+					String resultVotes = rs.getString("Votes");
 					//ONCE GENRE IS WORKING FOR SEARCH
 					//String genre = rs.getString("Genres");
 					
-					outputString = n + ". Movie Title: " + nameqqq + "    Release Date: " + dateqqq + "    Rating: " + rankqqq + "    Votes: " + votesqqq;
-					n++;
-					
-					if(!outputString.equals(previousOutput)) {
-						myModel.addElement(outputString);
-						previousOutput = outputString;
+					if(mySearchButton.isSelected()) {
+						outputString += ". Movie Title: " + resultName + "    Release Date: " + resultYear + "    Rating: " + resultRating + "    Votes: " + resultVotes;
 					}
+					else if (myRouleteButton.isSelected()) {
+						//This Sprint (Sprint 3)
+						//outputString +=
+						// TODO Auto-generated method stub
+					}
+					else if (myPredictorButton.isSelected()) {
+						//LAST SPRINT (SPRINT 4)
+						//outputString +=
+						// TODO Auto-generated method stub
+					}
+					
+					n++;
+					myModel.addElement(outputString);
+
 				}
 				/*if (searchText.equals(query)) {
      	            System.out.println("Searching names.."  + query);
@@ -343,6 +354,7 @@ public class yamDB {
 			if(genre != null && !genre.equals("Select Genre")) {
 				//I think this next line is nearly working, but it freezes... I don't know why... may just be too big? -David
 				//searchStatement = "SELECT Ratings.Title, Ratings.Year, Ratings.Rank, Ratings.Votes, Genres.Genres FROM Ratings INNER JOIN Genres";
+				//This Sprint (Sprint 3)
 				// TODO method stub
 				System.out.println("Genres isn't workign here yet, but you chose: " + genre);
 			}
@@ -359,6 +371,7 @@ public class yamDB {
 
 		//Generates a SQL Roulette query (goal being to give a specific movie recommendation) and returns that string
 		private String createRouletteQuery() {
+			//This Sprint (Sprint 3)
 			// TODO Auto-generated method stub
 			return null;
 		}
@@ -366,6 +379,7 @@ public class yamDB {
 		//Generates a SQL Predictor query (goal being to have the user select an Actor OR a Production Company then also add
 		// year range they are interested in, to see
 		private String createPredictorQuery() {
+			//LAST SPRINT (SPRINT 4)
 			// TODO Auto-generated method stub
 			return null;
 		}
