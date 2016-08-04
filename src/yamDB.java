@@ -144,6 +144,7 @@ public class yamDB {
 		myJtxtFieldActor = new JTextField();
 		innerPan3.add(actorlb);
 		innerPan3.add(myJtxtFieldActor);
+		myJtxtFieldActor.setEnabled(false);
 
 		//rating From
 		JPanel innerPan4 = new JPanel();
@@ -152,7 +153,7 @@ public class yamDB {
 		myRatingsfrom = new JComboBox<String>();
 		ArrayList<Integer> ratingsfromList = new ArrayList<Integer>();
 		myRatingsfrom.addItem(" ");
-		for(int i = 1; i < 11; i++){
+		for(int i = 0; i < 11; i++){
 			ratingsfromList.add(i);
 			myRatingsfrom.addItem(i + "");
 		}
@@ -181,9 +182,9 @@ public class yamDB {
 				"Romance", "Animation", "Family", "Horror", "Music", "Crime", "Adventure", "Fantasy", "Sci-Fi",
 				"Mystery", "Biography", "History", "Sport", "Musical", "War", "Western", "Reality-TV", "News",
 				"Talk-Show", "Game-Show", "Film-Noir", "Lifestyle" , "Experimental", "Erotica", "Commercial"};
-		JComboBox<String> genresList = new JComboBox<>(genres);
+		myGenre = new JComboBox<>(genres);
 		innerPan5.add(genrelb);
-		innerPan5.add(genresList);
+		innerPan5.add(myGenre);
 
 		//search button
 		JPanel innerPan6 = new JPanel();
@@ -263,7 +264,6 @@ public class yamDB {
 				String queryStartRank = (String) myRatingsfrom.getSelectedItem();
 				String queryEndRank = (String) myRatingsto.getSelectedItem();
 				String queryGenre = (String) myGenre.getSelectedItem();
-				
 				String completedQuery = "";
 				if(mySearchButton.isSelected()) {
 					completedQuery = createSearchQuery(queryName, queryStartYear, queryEndYear, queryStartRank.trim(), queryEndRank.trim(), queryGenre);
@@ -282,7 +282,7 @@ public class yamDB {
      			ResultSet rs = pst.executeQuery();*/
 				String outputString = "";
 				ResultSet rs = null;
-				System.out.println(completedQuery);
+				System.out.println("Your SQL Query: " + completedQuery);
 				rs = myStmt.executeQuery(completedQuery);
 				
 				//4 Process the result set
@@ -294,6 +294,9 @@ public class yamDB {
 					String dateqqq = rs.getString("Year").substring(0, 4);
 					String rankqqq = rs.getString("Rank");
 					String votesqqq = rs.getString("Votes");
+					
+					//ONCE GENRE IS WORKING FOR SEARCH
+					//String genre = rs.getString("Genres");
 					
 					outputString = n + ". Movie Title: " + nameqqq + "    Release Date: " + dateqqq + "    Rating: " + rankqqq + "    Votes: " + votesqqq;
 					n++;
@@ -317,33 +320,36 @@ public class yamDB {
 		
 		//Generates a SQL search query (goal to find movies that match the stuff they put in) and returns that string
 		private String createSearchQuery(String name, String startYear, String endYear, String startRank, String endRank, String genre) {
-			String searchStatement = "SELECT * FROM Ratings";
+			String searchStatement = "SELECT Ratings.Title, Ratings.Year, Ratings.Rank, Ratings.Votes FROM Ratings";
 			String searchSpecifics = "";
 			//also search date if we were sent one
 			String and = " AND";
 			
 			if(name.length() > 0) {
-				searchSpecifics += and + " Title = '" + name + "'";
+				searchSpecifics += and + " Ratings.Title = '" + name + "'";
 			}
 			if(startYear.length() == 4) {
-				searchSpecifics += and + " Year >= " + startYear;
+				searchSpecifics += and + " Ratings.Year >= " + startYear;
 			}
 			if(endYear.length() == 4) {
-				searchSpecifics += and + " Year <= " + endYear;
+				searchSpecifics += and + " Ratings.Year <= " + endYear;
 			}
 			if(startRank.length() > 0) {
-				searchSpecifics += and + " Rank >= " + startRank;
+				searchSpecifics += and + " Ratings.Rank >= " + startRank;
 			}
 			if(endRank.length() > 0) {
-				searchSpecifics += and + " Rank <= " + endRank;
+				searchSpecifics += and + " Ratings.Rank <= " + endRank;
 			}
-			
 			if(genre != null && !genre.equals("Select Genre")) {
-				searchSpecifics += "";
+				//I think this next line is nearly working, but it freezes... I don't know why... may just be too big? -David
+				//searchStatement = "SELECT Ratings.Title, Ratings.Year, Ratings.Rank, Ratings.Votes, Genres.Genres FROM Ratings INNER JOIN Genres";
 				// TODO method stub
+				System.out.println("Genres isn't workign here yet, but you chose: " + genre);
 			}
 
-			
+			//SELECT Ratings.Title, Ratings.Rank, Ratings.Votes, Ratings.Year, Genres.Genres FROM
+			//Ratings INNER JOIN Genres Where Ratings.Year >= 1992 AND Ratings.Year <= 1995 AND
+			//Ratings.Rank >= 8 AND Ratings.Rank <= 10
 			if(searchSpecifics.length() > 0) {
 				searchStatement += " WHERE" + searchSpecifics.substring(and.length(), searchSpecifics.length()) + ";";
 			}
