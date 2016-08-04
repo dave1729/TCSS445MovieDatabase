@@ -303,6 +303,7 @@ public class yamDB {
 						outputString += ". Movie Title: " + resultName + "    Release Date: " + resultYear + "    Rating: " + resultRating + "    Votes: " + resultVotes;
 					}
 					else if (myRouleteButton.isSelected()) {
+						//Use if-statement above as a guide
 						//This Sprint (Sprint 3)
 						//outputString +=
 						// TODO Auto-generated method stub
@@ -371,6 +372,7 @@ public class yamDB {
 
 		//Generates a SQL Roulette query (goal being to give a specific movie recommendation) and returns that string
 		private String createRouletteQuery() {
+			//Use method above "createSearchQuery" as a guide if you are unsure how to do this one. -david
 			//This Sprint (Sprint 3)
 			// TODO Auto-generated method stub
 			return null;
