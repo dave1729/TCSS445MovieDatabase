@@ -17,6 +17,9 @@ import javax.swing.ButtonGroup;
 import javax.swing.ButtonModel;
 import javax.swing.DefaultListModel;
 import javax.swing.border.EmptyBorder;
+
+import yamDB.Title;
+
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -269,7 +272,7 @@ public class yamDB {
 					completedQuery = createSearchQuery(queryName, queryStartYear, queryEndYear, queryStartRank.trim(), queryEndRank.trim(), queryGenre);
 				}
 				else if (myRouleteButton.isSelected()) {
-					completedQuery = createRouletteQuery();
+					completedQuery = createRouletteQuery(queryStartYear, queryEndYear, queryStartRank.trim(), queryEndRank.trim());
 				}
 				else if (myPredictorButton.isSelected()) {
 					completedQuery = createPredictorQuery();
@@ -280,17 +283,18 @@ public class yamDB {
      			PreparedStatement pst = (PreparedStatement) myCon.prepareStatement(query);
      			pst.setString(1, "%" + searchText + "%");
      			ResultSet rs = pst.executeQuery();*/
-				String outputString = "";
+				
 				ResultSet rs = null;
 				System.out.println("Your SQL Query: " + completedQuery);
 				rs = myStmt.executeQuery(completedQuery);
 				
-				//4 Process the result set
+				//4 GET RESULT SET BACK FROM SQL
 
 				int n = 1;
+				ArrayList<Title> outputList = new ArrayList<Title>();
 				while(rs.next()) {
 					
-					outputString = n + "";
+					Title currentTitle = null;
 					
 					String resultName = rs.getString("Title");
 					String resultYear = rs.getString("Year").substring(0, 4);
@@ -300,12 +304,14 @@ public class yamDB {
 					//String genre = rs.getString("Genres");
 					
 					if(mySearchButton.isSelected()) {
-						outputString += ". Movie Title: " + resultName + "    Release Date: " + resultYear + "    Rating: " + resultRating + "    Votes: " + resultVotes;
+						currentTitle = new Title(n, resultName, Integer.parseInt(resultYear), Integer.parseInt(resultRating), Integer.parseInt(resultVotes));
+						//outputString += ". Movie Title: " + resultName + "    Release Date: " + resultYear + "    Rating: " + resultRating + "    Votes: " + resultVotes;
 					}
 					else if (myRouleteButton.isSelected()) {
 						//Use if-statement above as a guide
 						//This Sprint (Sprint 3)
-						//outputString +=
+						currentTitle = new Title(n, resultName, Integer.parseInt(resultYear), Integer.parseInt(resultRating), Integer.parseInt(resultVotes));
+						//outputString += ". Movie Title: " + resultName + "    Release Date: " + resultYear + "    Rating: " + resultRating + "    Votes: " + resultVotes;
 						// TODO Auto-generated method stub
 					}
 					else if (myPredictorButton.isSelected()) {
@@ -315,9 +321,31 @@ public class yamDB {
 					}
 					
 					n++;
-					myModel.addElement(outputString);
+					outputList.add(currentTitle);
 
 				}
+				
+				//5 DECIDE HOW MUCH OF RESULT SET TO PRINT TO USER (result set called "outputlist" here)
+				
+				if(outputList.size() > 0) {
+					if (mySearchButton.isSelected()) {
+						for(Title eachTitle : outputList)
+							myModel.addElement(eachTitle.toString());
+					}
+					//If we are in Roulette Mode, just give more popular one for now...
+					// TODO Auto-generated method stub
+					else if (myRouleteButton.isSelected()) {
+						myModel.addElement("Our reccomendation to you is.... ");
+						myModel.addElement(outputList.get(0).toString());
+					}
+					else if (myPredictorButton.isSelected()) {
+						// TODO Auto-generated method stub
+					}
+				}
+				else {
+					myModel.addElement("Sorry, we didn't find anything that matched those parameters.");
+				}
+
 				/*if (searchText.equals(query)) {
      	            System.out.println("Searching names.."  + query);
      	            }*/
@@ -357,12 +385,13 @@ public class yamDB {
 				//searchStatement = "SELECT Ratings.Title, Ratings.Year, Ratings.Rank, Ratings.Votes, Genres.Genres FROM Ratings INNER JOIN Genres";
 				//This Sprint (Sprint 3)
 				// TODO method stub
-				System.out.println("Genres isn't workign here yet, but you chose: " + genre);
+				//System.out.println("Genres isn't workign here yet, but you chose: " + genre);
 			}
 
 			//SELECT Ratings.Title, Ratings.Rank, Ratings.Votes, Ratings.Year, Genres.Genres FROM
 			//Ratings INNER JOIN Genres Where Ratings.Year >= 1992 AND Ratings.Year <= 1995 AND
 			//Ratings.Rank >= 8 AND Ratings.Rank <= 10
+
 			if(searchSpecifics.length() > 0) {
 				searchStatement += " WHERE" + searchSpecifics.substring(and.length(), searchSpecifics.length()) + ";";
 			}
@@ -371,11 +400,34 @@ public class yamDB {
 		}
 
 		//Generates a SQL Roulette query (goal being to give a specific movie recommendation) and returns that string
-		private String createRouletteQuery() {
-			//Use method above "createSearchQuery" as a guide if you are unsure how to do this one. -david
-			//This Sprint (Sprint 3)
-			// TODO Auto-generated method stub
-			return null;
+		private String createRouletteQuery(String startYear, String endYear, String startRank, String endRank) {
+			String searchStatement = "SELECT Ratings.Title, Ratings.Year, Ratings.Rank, Ratings.Votes FROM Ratings";
+			String searchSpecifics = "";
+			//also search date if we were sent one
+			String and = " AND";
+			
+			if(startYear.length() == 4) {
+				searchSpecifics += and + " Ratings.Year >= " + startYear;
+			}
+			if(endYear.length() == 4) {
+				searchSpecifics += and + " Ratings.Year <= " + endYear;
+			}
+			if(startRank.length() > 0) {
+				searchSpecifics += and + " Ratings.Rank >= " + startRank;
+			}
+			if(endRank.length() > 0) {
+				searchSpecifics += and + " Ratings.Rank <= " + endRank;
+			}
+
+			//SELECT Ratings.Title, Ratings.Rank, Ratings.Votes, Ratings.Year, Genres.Genres FROM
+			//Ratings INNER JOIN Genres Where Ratings.Year >= 1992 AND Ratings.Year <= 1995 AND
+			//Ratings.Rank >= 8 AND Ratings.Rank <= 10
+
+			if(searchSpecifics.length() > 0) {
+				searchStatement += " WHERE" + searchSpecifics.substring(and.length(), searchSpecifics.length());
+			}
+			
+			return searchStatement + " ORDER BY Ratings.Votes DESC;";
 		}
 
 		//Generates a SQL Predictor query (goal being to have the user select an Actor OR a Production Company then also add
@@ -385,5 +437,32 @@ public class yamDB {
 			// TODO Auto-generated method stub
 			return null;
 		}
+	}
+	
+	public class Title {
+		
+		private int n;
+		private String name;
+		private int year;
+		private int rank;
+		private int votes;
+
+		public Title(int n, String name, int year, int rank, int votes) {
+			this.n = n;
+			this.name = name;
+			this.year = year;
+			this.rank = rank;
+			this.votes = votes;
+		}
+		
+		public int getVotes() {
+			return votes;
+		}
+		
+		@Override
+		public String toString() {
+			return n + ". Movie Title: " + name + "    Release Date: " + year + "    Rating: " + rank;
+		}
+
 	}
 }
