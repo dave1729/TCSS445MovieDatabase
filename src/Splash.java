@@ -27,7 +27,7 @@ public class Splash extends JWindow
         setBounds(x,y,width,height);
 
         // Build the splash screen
-        JLabel label = new JLabel(new ImageIcon("src/images/pic.jpg"));
+        JLabel label = new JLabel(new ImageIcon("src/splashImg.png"));
         JLabel copyrt = new JLabel
                 ("Copyright 2016, Yam DB", JLabel.CENTER);
         copyrt.setFont(new Font("Sans-Serif", Font.BOLD, 12));

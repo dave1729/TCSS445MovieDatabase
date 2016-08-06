@@ -1,4 +1,6 @@
 import java.awt.EventQueue;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
 
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -18,7 +20,7 @@ import javax.swing.ButtonModel;
 import javax.swing.DefaultListModel;
 import javax.swing.border.EmptyBorder;
 
-import yamDB.Title;
+ //import yamDB.Title; remove this 
 
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
@@ -80,15 +82,31 @@ public class yamDB {
 		frame.setBounds(100, 100, 900, 700);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		JPanel panel = new JPanel();
-		BoxLayout boxlayout = new BoxLayout(panel, BoxLayout.Y_AXIS);
-		panel.setLayout(boxlayout);
-		panel.setBorder(new EmptyBorder(new Insets(50, 80, 50, 80))); 
+	
+		//new
+		panel.setLayout(new GridBagLayout());
+		GridBagConstraints c = new GridBagConstraints();
+		
+		//BoxLayout boxlayout = new BoxLayout(panel, BoxLayout.Y_AXIS);
+		//panel.setLayout(boxlayout);
+		//panel.setBorder(new EmptyBorder(new Insets(50, 80, 50, 80))); 
 
 		// Icon
 		JLabel lbIcon = new JLabel();
-		ImageIcon icon = createImageIcon("logo.png","");
+		ImageIcon icon = createImageIcon("logo1.png","");
 		lbIcon.setIcon(icon);
-
+		//new
+		c.fill = GridBagConstraints.HORIZONTAL;
+		c.weightx = 0.5;
+		c.gridx = 0;
+		c.gridy = 0;
+		c.insets = new Insets(10,0,35,0);	
+		panel.add(lbIcon, c);
+		
+		//new
+		JPanel infoPan = new JPanel();
+		infoPan.setLayout(new BoxLayout(infoPan,BoxLayout.Y_AXIS));
+		
 		//radio buttons
 		JPanel innerPan1 = new JPanel();
 		innerPan1.setLayout(new BoxLayout(innerPan1, BoxLayout.X_AXIS));
@@ -201,6 +219,27 @@ public class yamDB {
 		myJtxtFieldYearFrom.addActionListener(handler);
 		innerPan6.add(myButtonSearch,BorderLayout.CENTER);
 		
+		//new
+		c.fill =GridBagConstraints.HORIZONTAL;
+		c.weightx = 0.5;
+		c.gridx = 1; 
+		c.gridx = 1;
+		c.insets = new Insets(0,0,0,40);	
+		
+		infoPan.add(innerPan1);
+		infoPan.add(Box.createVerticalStrut(20));
+		infoPan.add(innerPan2);
+		infoPan.add(Box.createVerticalStrut(20));
+		infoPan.add(innerPan3);
+		infoPan.add(Box.createVerticalStrut(20));
+		infoPan.add(innerPan4);
+		infoPan.add(Box.createVerticalStrut(20));
+		infoPan.add(innerPan5);
+		infoPan.add(Box.createVerticalStrut(20));
+		infoPan.add(innerPan6);
+		
+		panel.add(infoPan,c);
+		
 		//Table
 		/*JTable movieTalbe = new JTable();
 		DefaultTableModel dtm = new DefaultTableModel();
@@ -216,23 +255,34 @@ public class yamDB {
 		
 		myModel = new DefaultListModel<>();
 		JList<String> list = new JList<String>(myModel);
-		panel.add(lbIcon);
-		panel.add(Box.createVerticalStrut(30));
-		panel.add(innerPan1);
-		panel.add(Box.createVerticalStrut(30));
-		panel.add(innerPan);
-		panel.add(Box.createVerticalStrut(15));
-		panel.add(innerPan3);
-		panel.add(Box.createVerticalStrut(15));
-		panel.add(innerPan2);
-		panel.add(Box.createVerticalStrut(15));
-		panel.add(innerPan4);
-		panel.add(Box.createVerticalStrut(15));
-		panel.add(innerPan5);
-		panel.add(Box.createVerticalStrut(15));
-		panel.add(innerPan6);
-		panel.add(Box.createVerticalStrut(15));
-		panel.add(new JScrollPane(list));
+		
+		c.fill = GridBagConstraints.HORIZONTAL;
+		c.ipady = 300;      //make this component tall
+		c.weightx = 0.0;
+		c.gridwidth = 3;
+		c.gridx = 0;
+		c.gridy = 1;
+		c.insets = new Insets(0,35,35,35);	
+		
+		panel.add(new JScrollPane(list),c);
+			
+//		panel.add(lbIcon);
+//		panel.add(Box.createVerticalStrut(30));
+//		panel.add(innerPan1);
+//		panel.add(Box.createVerticalStrut(30));
+//		panel.add(innerPan);
+//		panel.add(Box.createVerticalStrut(15));
+//		panel.add(innerPan3);
+//		panel.add(Box.createVerticalStrut(15));
+//		panel.add(innerPan2);
+//		panel.add(Box.createVerticalStrut(15));
+//		panel.add(innerPan4);
+//		panel.add(Box.createVerticalStrut(15));
+//		panel.add(innerPan5);
+//		panel.add(Box.createVerticalStrut(15));
+//		panel.add(innerPan6);
+//		panel.add(Box.createVerticalStrut(15));
+//		panel.add(new JScrollPane(list));
 		//panel.add(new JScrollPane(movieTalbe));
 		frame.add(panel);
 		frame.pack();
