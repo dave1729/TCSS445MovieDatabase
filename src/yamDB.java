@@ -45,7 +45,7 @@ import java.util.Random;
 public class yamDB {
 	
 	private static final int MAX_ROULETTE_CHOICE_RANGE = 100000;//(in titles)
-	private static final int QUERY_MAX_TIME = 15; //(in seconds)
+	private static final int QUERY_MAX_TIME = 90; //(in seconds)
 
 	private JFrame frame;
 	//private ButtonGroup menuButtonGroup;
@@ -433,7 +433,7 @@ public class yamDB {
 				}
 				else if (myRouleteButton.isSelected()) {
 					
-					completedQuery = createRouletteQuery(queryStartYear, queryEndYear, queryStartRank.trim(), queryEndRank.trim());
+					completedQuery = createRouletteQuery(queryStartYear, queryEndYear, queryStartRank.trim(), queryEndRank.trim(), queryGenre);
 				}
 				else if (myPredictorButton.isSelected()) {
 					completedQuery = createPredictorQuery();
@@ -445,9 +445,9 @@ public class yamDB {
      			pst.setString(1, "%" + searchText + "%");
      			ResultSet rs = pst.executeQuery();*/
 				
-				ResultSet rs = null;
+				//completedQuery = "SELECT * FROM Genres WHERE Genre = 'Drama'";
 				System.out.println("Your SQL Query: " + completedQuery);
-				rs = myStmt.executeQuery(completedQuery);
+				ResultSet rs = myStmt.executeQuery(completedQuery);
 				System.out.println("Query Finished!");
 				//4 GET RESULT SET BACK FROM SQL
 
@@ -462,16 +462,17 @@ public class yamDB {
 					String resultRating = rs.getString("Rank");
 					String resultVotes = rs.getString("Votes");
 					//ONCE GENRE IS WORKING FOR SEARCH
-					//String genre = rs.getString("Genres");
+					String genre = rs.getString("Genre");
 					
 					if(mySearchButton.isSelected()) {
-						currentTitle = new Title(n, resultName, Integer.parseInt(resultYear), Integer.parseInt(resultRating), Integer.parseInt(resultVotes));
+						currentTitle = new Title(n, resultName, Integer.parseInt(resultYear), Integer.parseInt(resultRating), Integer.parseInt(resultVotes), genre);
 						//outputString += ". Movie Title: " + resultName + "    Release Date: " + resultYear + "    Rating: " + resultRating + "    Votes: " + resultVotes;
+						//currentTitle = new Title(n, resultName, Integer.parseInt(resultYear), genre);
 					}
 					else if (myRouleteButton.isSelected()) {
 						//Use if-statement above as a guide
 						//This Sprint (Sprint 3)
-						currentTitle = new Title(n, resultName, Integer.parseInt(resultYear), Integer.parseInt(resultRating), Integer.parseInt(resultVotes));
+						currentTitle = new Title(n, resultName, Integer.parseInt(resultYear), Integer.parseInt(resultRating), Integer.parseInt(resultVotes), genre);
 						//outputString += ". Movie Title: " + resultName + "    Release Date: " + resultYear + "    Rating: " + resultRating + "    Votes: " + resultVotes;
 						// TODO Auto-generated method stub
 					}
@@ -494,8 +495,6 @@ public class yamDB {
 						for(Title eachTitle : outputList)
 							myModel.addElement(eachTitle.toString());
 					}
-					//If we are in Roulette Mode, just give more popular one for now...
-					// TODO Auto-generated method stub
 					//ROULETTE (output one result)
 					else if (myRouleteButton.isSelected()) {
 						myModel.addElement("Our reccomendation to you is.... ");
@@ -548,8 +547,10 @@ public class yamDB {
 				searchSpecifics += and + " Ratings.Rank <= " + endRank;
 			}
 			if(genre != null && !genre.equals("Select")) {
+				System.out.println("GENRE: " + genre);
+				searchSpecifics += and + " Genres.Genre = '" + genre + "'";
 				//I think this next line is nearly working, but it freezes... I don't know why... may just be too big? -David
-				searchStatement = "SELECT Ratings.Title, Ratings.Year, Ratings.Rank, Ratings.Votes, Genres.Genre FROM Ratings INNER JOIN Genres";
+				searchStatement = "SELECT Ratings.Title, Ratings.Year, Ratings.Rank, Ratings.Votes, Genres.Genre FROM Ratings INNER JOIN Genres ON Ratings.MovieID = Genres.MovieID";
 				//This Sprint (Sprint 3)
 				// TODO method stub
 				//System.out.println("Genres isn't workign here yet, but you chose: " + genre);
@@ -560,6 +561,7 @@ public class yamDB {
 			//Ratings.Rank >= 8 AND Ratings.Rank <= 10
 
 			if(searchSpecifics.length() > 0) {
+				//add our WHERE statements, removing the first "and"
 				searchStatement += " WHERE" + searchSpecifics.substring(and.length(), searchSpecifics.length()) + ";";
 			}
 			
@@ -567,7 +569,7 @@ public class yamDB {
 		}
 
 		//Generates a SQL Roulette query (goal being to give a specific movie recommendation) and returns that string
-		private String createRouletteQuery(String startYear, String endYear, String startRank, String endRank) {
+		private String createRouletteQuery(String startYear, String endYear, String startRank, String endRank, String genre) {
 			String searchStatement = "SELECT Ratings.Title, Ratings.Year, Ratings.Rank, Ratings.Votes FROM Ratings";
 			String searchSpecifics = "";
 			//also search date if we were sent one
@@ -585,9 +587,14 @@ public class yamDB {
 			if(endRank.length() > 0) {
 				searchSpecifics += and + " Ratings.Rank <= " + endRank;
 			}
-			//SELECT Ratings.Title, Ratings.Rank, Ratings.Votes, Ratings.Year, Genres.Genres FROM
-			//Ratings INNER JOIN Genres Where Ratings.Year >= 1992 AND Ratings.Year <= 1995 AND
-			//Ratings.Rank >= 8 AND Ratings.Rank <= 10
+			if(genre != null && !genre.equals("Select")) {
+				searchSpecifics += and + " Genres.Genre = '" + genre + "'";
+				//I think this next line is nearly working, but it freezes... I don't know why... may just be too big? -David
+				searchStatement = "SELECT Ratings.Title, Ratings.Year, Ratings.Rank, Ratings.Votes, Genres.Genre FROM Ratings INNER JOIN Genres ON Ratings.MovieID = Genres.MovieID";
+				//This Sprint (Sprint 3)
+				// TODO method stub
+				//System.out.println("Genres isn't workign here yet, but you chose: " + genre);
+			}
 
 			if(searchSpecifics.length() > 0) {
 				searchStatement += " WHERE" + searchSpecifics.substring(and.length(), searchSpecifics.length());
@@ -614,6 +621,13 @@ public class yamDB {
 		private int year;
 		private int rank;
 		private int votes;
+		private String genre;
+		
+		public Title(int n, String name, int year, String genre) {
+			this.n = n;
+			this.name = name;
+			this.genre = genre;
+		}
 
 		public Title(int n, String name, int year, int rank, int votes) {
 			this.n = n;
@@ -621,6 +635,16 @@ public class yamDB {
 			this.year = year;
 			this.rank = rank;
 			this.votes = votes;
+			this.genre = null;
+		}
+
+		public Title(int n, String name, int year, int rank, int votes, String genre) {
+			this.n = n;
+			this.name = name;
+			this.year = year;
+			this.rank = rank;
+			this.votes = votes;
+			this.genre = genre;
 		}
 		
 		public int getVotes() {
@@ -629,7 +653,7 @@ public class yamDB {
 		
 		@Override
 		public String toString() {
-			return n + ". Movie Title: " + name + "    Release Date: " + year + "    Rating: " + rank;
+			return "Result#: " + n + "    Movie Title: " + name + "    Release Date: " + year + "    Rating: " + rank + "    Genre: " + genre;
 		}
 
 	}
