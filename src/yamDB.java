@@ -7,24 +7,33 @@ import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import java.awt.BorderLayout;
+import java.awt.Color;
+
 import javax.swing.JLabel;
 import javax.swing.JList;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
+import javax.swing.UIManager;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.ButtonGroup;
 import javax.swing.ButtonModel;
 import javax.swing.DefaultListModel;
 import javax.swing.border.EmptyBorder;
+import javax.swing.plaf.ColorUIResource;
 
- //import yamDB.Title; remove this 
+//import yamDB.Title; remove this 
 
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -48,6 +57,7 @@ public class yamDB {
 	private JComboBox<String> myGenre;
 	private JButton myButtonSearch;
 	private DefaultListModel<String> myModel;
+	private JMenuBar myMenuBar;
 
 	/**
 	 * Launch the application.
@@ -59,7 +69,10 @@ public class yamDB {
 			public void run() {
 				try {
 					yamDB window = new yamDB();
+					
 					window.frame.setVisible(true);
+					
+					
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
@@ -72,16 +85,19 @@ public class yamDB {
 	 */
 	public yamDB() {
 		initialize();
+		
 	}
-
+	
 	/**
 	 * Initialize the contents of the frame.
 	 */
 	private void initialize() {
-		frame = new JFrame("Yam DB");
+		frame = new JFrame("YAMDB");
+		
 		frame.setBounds(100, 100, 900, 700);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		JPanel panel = new JPanel();
+	panel.setBackground(Color.white);
 	
 		//new
 		panel.setLayout(new GridBagLayout());
@@ -106,11 +122,12 @@ public class yamDB {
 		//new
 		JPanel infoPan = new JPanel();
 		infoPan.setLayout(new BoxLayout(infoPan,BoxLayout.Y_AXIS));
+		infoPan.setBackground(Color.white);
 		
 		//radio buttons
 		JPanel innerPan1 = new JPanel();
 		innerPan1.setLayout(new BoxLayout(innerPan1, BoxLayout.X_AXIS));
-		JLabel radiolb = new JLabel("I WANT TO  ");
+		JLabel radiolb = new JLabel("I WOULD LIKE TO  ");
 		
 		ButtonGroup menuButtonGroup = new ButtonGroup();
 		
@@ -118,16 +135,17 @@ public class yamDB {
 		mySearchButton.setSelected(true);
 		myRouleteButton = new JRadioButton(" PLAY ROULETTE");
 		myPredictorButton = new JRadioButton(" USE PREDICTOR");
+		
 		innerPan1.add(radiolb);
 		
 		menuButtonGroup.add(mySearchButton);
 		menuButtonGroup.add(myRouleteButton);
 		menuButtonGroup.add(myPredictorButton);
-		
+	
 		innerPan1.add(mySearchButton);
 		innerPan1.add(myRouleteButton);
 		innerPan1.add(myPredictorButton);
-		
+		innerPan1.setBackground(Color.white);
 		/*searchButton.addActionListener(this);
 	    rouleteButton.addActionListener(this);
 	    predictorButton.addActionListener(this);
@@ -138,6 +156,7 @@ public class yamDB {
 		
 		//search by movie title
 		JPanel innerPan = new JPanel();
+		innerPan.setBackground(Color.white);
 		innerPan.setLayout(new BoxLayout(innerPan, BoxLayout.X_AXIS));
 		JLabel lb1 = new JLabel("Movie Title  ");
 		myJtxtFieldName = new JTextField();
@@ -146,6 +165,7 @@ public class yamDB {
 
 		//year from
 		JPanel innerPan2 = new JPanel();
+		innerPan2.setBackground(Color.white);
 		innerPan2.setLayout(new BoxLayout(innerPan2, BoxLayout.X_AXIS));		
 		JLabel yearfromlb = new JLabel("Year From  ");
 		myJtxtFieldYearFrom = new JTextField();
@@ -160,6 +180,7 @@ public class yamDB {
 
 		//actor
 		JPanel innerPan3 = new JPanel();
+		innerPan3.setBackground(Color.white);
 		innerPan3.setLayout(new BoxLayout(innerPan3, BoxLayout.X_AXIS));	
 		JLabel actorlb = new JLabel("Actor's Name  ");
 		myJtxtFieldActor = new JTextField();
@@ -169,55 +190,88 @@ public class yamDB {
 
 		//rating From
 		JPanel innerPan4 = new JPanel();
+		innerPan4.setBackground(Color.white);
 		innerPan4.setLayout(new BoxLayout(innerPan4, BoxLayout.X_AXIS));	
-		JLabel ratingsfromlb = new JLabel("Rating From  ");
+		JLabel ratingsfromlb = new JLabel("Rating FROM ");
 		myRatingsfrom = new JComboBox<String>();
 		ArrayList<Integer> ratingsfromList = new ArrayList<Integer>();
-		myRatingsfrom.addItem(" ");
-		for(int i = 0; i < 11; i++){
+		myRatingsfrom.addItem("Select");
+		for(int i = 1; i < 11; i++){
 			ratingsfromList.add(i);
 			myRatingsfrom.addItem(i + "");
 		}
 		
 		innerPan4.add(ratingsfromlb);
 		innerPan4.add(myRatingsfrom);
+		myRatingsfrom.setBackground(Color.white);
 
 		//rating To
-		JLabel ratingstolb = new JLabel("  To  ");
+		JLabel ratingstolb = new JLabel(" TO ");
 		myRatingsto = new JComboBox<String>();
 		ArrayList<Integer> ratingstoList = new ArrayList<Integer>();
-		myRatingsto.addItem(" ");
+		myRatingsto.addItem("Select");
 		for(int i = 1; i < 11; i++){
 			ratingstoList.add(i);
 			myRatingsto.addItem(i + "");
 		}
 		innerPan4.add(ratingstolb);
 		innerPan4.add(myRatingsto);
+		myRatingsto.setBackground(Color.white);
 
 		// Genre
 		JPanel innerPan5 = new JPanel();
+		innerPan5.setBackground(Color.white);
 		innerPan5.setLayout(new BoxLayout(innerPan5, BoxLayout.X_AXIS));	
 		JLabel genrelb = new JLabel("Genre  ");
 		myGenre = new JComboBox<String>();
-		String[] genres = new String[] {"Select Genre", "Short", "Drama", "Comedy", "Documentary", "Adult", "Action", "Thriller",
+		String[] genres = new String[] {"Select", "Short", "Drama", "Comedy", "Documentary", "Adult", "Action", "Thriller",
 				"Romance", "Animation", "Family", "Horror", "Music", "Crime", "Adventure", "Fantasy", "Sci-Fi",
 				"Mystery", "Biography", "History", "Sport", "Musical", "War", "Western", "Reality-TV", "News",
 				"Talk-Show", "Game-Show", "Film-Noir", "Lifestyle" , "Experimental", "Erotica", "Commercial"};
 		myGenre = new JComboBox<>(genres);
+		//myGenre.setEnabled(false);//DISABLE GENRE FIELD FOR NOW UNTIL FIXED
+		
 		innerPan5.add(genrelb);
 		innerPan5.add(myGenre);
-
+		myGenre.setBackground(Color.white);
+		
+		//UIManager.put("JComboBox.Background", new ColorUIResource(Color.GREEN));
 		//search button
 		JPanel innerPan6 = new JPanel();
 		innerPan6.setLayout(new BorderLayout());
-		myButtonSearch = new JButton("Search");
+		myButtonSearch = new JButton("SEARCH");
+		myButtonSearch.setBackground(new Color(251, 215, 100));
 		ActionHandler handler = new ActionHandler();
-
+		
 		//listeners
 		myButtonSearch.addActionListener(handler);
 		myJtxtFieldName.addActionListener(handler);
 		myJtxtFieldYearFrom.addActionListener(handler);
 		innerPan6.add(myButtonSearch,BorderLayout.CENTER);
+		
+		myRouleteButton.addActionListener(new ActionListener() {
+	        @Override
+	        public void actionPerformed(ActionEvent e) {
+	        	myJtxtFieldName.setEnabled(false);
+	        	myButtonSearch.setText("ROULETTE");
+
+	        }
+	    });
+		
+		mySearchButton.addActionListener(new ActionListener() {
+	        @Override
+	        public void actionPerformed(ActionEvent e) {
+	        	myJtxtFieldName.setEnabled(true);
+	        	myButtonSearch.setText("SEARCH");
+	        }
+	    });
+		
+		myPredictorButton.addActionListener(new ActionListener() {
+	        @Override
+	        public void actionPerformed(ActionEvent e) {
+	        	myButtonSearch.setText("PREDICT");
+	        }
+	    });
 		
 		//new
 		c.fill =GridBagConstraints.HORIZONTAL;
@@ -227,6 +281,8 @@ public class yamDB {
 		c.insets = new Insets(0,0,0,40);	
 		
 		infoPan.add(innerPan1);
+		infoPan.add(Box.createVerticalStrut(20));
+		infoPan.add(innerPan);
 		infoPan.add(Box.createVerticalStrut(20));
 		infoPan.add(innerPan2);
 		infoPan.add(Box.createVerticalStrut(20));
@@ -255,7 +311,6 @@ public class yamDB {
 		
 		myModel = new DefaultListModel<>();
 		JList<String> list = new JList<String>(myModel);
-		
 		c.fill = GridBagConstraints.HORIZONTAL;
 		c.ipady = 300;      //make this component tall
 		c.weightx = 0.0;
@@ -265,7 +320,54 @@ public class yamDB {
 		c.insets = new Insets(0,35,35,35);	
 		
 		panel.add(new JScrollPane(list),c);
-			
+
+		JMenuBar menuBar = new JMenuBar();
+
+		//Build the first menu.
+		final JMenu fileMenu = new JMenu("MENU"); // created file menu object
+        fileMenu.setMnemonic(KeyEvent.VK_M);
+        menuBar.add(fileMenu);
+        menuBar.setBackground(new Color(251, 215, 100));
+		JMenuItem menuAbout = new JMenuItem("About");
+		menuAbout.setBackground(new Color(251, 215, 100));
+		menuAbout.setForeground(Color.black);
+		menuAbout.setMnemonic(KeyEvent.VK_A);
+		menuAbout.addActionListener(new ActionListener() {
+	            public void actionPerformed(final ActionEvent theEvent) {
+	                JOptionPane.showMessageDialog(null, "TCSS 445 Database Systems Design / SUMMER 2016\n"
+	                                                + "\nDEVELOPED AND DESIGNED BY: \nVladimir Smirnov - developer\nDaniel Bayless - front-end developer\nChris Kubec - developer\nPeter Phe - developer\nDavid Humphreys - product owner / developer\nLola Howell - UX design / front-end developer",
+	                                                "About",
+	                                                JOptionPane.INFORMATION_MESSAGE);
+	            }
+	        });
+		fileMenu.add(menuAbout); //added item(sub menu) to file menu object
+        fileMenu.addSeparator();
+		JMenuItem menuHELP = new JMenuItem("Help");
+		menuHELP.setBackground(new Color(251, 215, 100));
+		menuHELP.setForeground(Color.black);
+		menuHELP.setMnemonic(KeyEvent.VK_H);
+		menuHELP.addActionListener(new ActionListener() {
+	            public void actionPerformed(final ActionEvent theEvent) {
+	                JOptionPane.showMessageDialog(null,"What is YAMBD?", "Help",
+	                                                JOptionPane.INFORMATION_MESSAGE);
+	            }
+	        });
+		fileMenu.add(menuHELP); //added item(sub menu) to file menu object
+		 fileMenu.addSeparator();
+        final JMenuItem quitMenu = new JMenuItem("Exit", KeyEvent.VK_X);
+        quitMenu.setBackground(new Color(251, 215, 100));
+        quitMenu.addActionListener(new ActionListener() {
+            public void actionPerformed(final ActionEvent theEvent) {
+                frame.dispose();
+            }
+        });
+        fileMenu.add(quitMenu);
+		UIManager UI=new UIManager();
+	        UI.put("OptionPane.background", Color.white);
+	        UI.put("Panel.background", Color.white);
+		frame.setJMenuBar(menuBar);
+		
+		
 //		panel.add(lbIcon);
 //		panel.add(Box.createVerticalStrut(30));
 //		panel.add(innerPan1);
@@ -322,6 +424,7 @@ public class yamDB {
 					completedQuery = createSearchQuery(queryName, queryStartYear, queryEndYear, queryStartRank.trim(), queryEndRank.trim(), queryGenre);
 				}
 				else if (myRouleteButton.isSelected()) {
+					
 					completedQuery = createRouletteQuery(queryStartYear, queryEndYear, queryStartRank.trim(), queryEndRank.trim());
 				}
 				else if (myPredictorButton.isSelected()) {
@@ -468,7 +571,6 @@ public class yamDB {
 			if(endRank.length() > 0) {
 				searchSpecifics += and + " Ratings.Rank <= " + endRank;
 			}
-
 			//SELECT Ratings.Title, Ratings.Rank, Ratings.Votes, Ratings.Year, Genres.Genres FROM
 			//Ratings INNER JOIN Genres Where Ratings.Year >= 1992 AND Ratings.Year <= 1995 AND
 			//Ratings.Rank >= 8 AND Ratings.Rank <= 10
@@ -479,7 +581,8 @@ public class yamDB {
 			
 			return searchStatement + " ORDER BY Ratings.Votes DESC;";
 		}
-
+		
+		
 		//Generates a SQL Predictor query (goal being to have the user select an Actor OR a Production Company then also add
 		// year range they are interested in, to see
 		private String createPredictorQuery() {
@@ -487,6 +590,7 @@ public class yamDB {
 			// TODO Auto-generated method stub
 			return null;
 		}
+		
 	}
 	
 	public class Title {
