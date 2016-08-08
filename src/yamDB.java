@@ -532,7 +532,7 @@ public class yamDB {
 			String and = " AND";
 			
 			if(name.length() > 0) {
-				searchSpecifics += and + " Ratings.Title LIKE '" + name + "'";
+				searchSpecifics += and + " Ratings.Title LIKE '" + name + "%'";
 			}
 			if(startYear.length() == 4) {
 				searchSpecifics += and + " Ratings.Year >= " + startYear;
