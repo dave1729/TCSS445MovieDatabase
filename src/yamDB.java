@@ -462,7 +462,10 @@ public class yamDB {
 					String resultRating = rs.getString("Rank");
 					String resultVotes = rs.getString("Votes");
 					//ONCE GENRE IS WORKING FOR SEARCH
-					String genre = rs.getString("Genre");
+					String genre = null;
+					if(queryGenre != null && !queryGenre.equals("Select")) {
+						genre = rs.getString("Genre");
+					}
 					
 					if(mySearchButton.isSelected()) {
 						currentTitle = new Title(n, resultName, Integer.parseInt(resultYear), Integer.parseInt(resultRating), Integer.parseInt(resultVotes), genre);
@@ -532,7 +535,7 @@ public class yamDB {
 			String and = " AND";
 			
 			if(name.length() > 0) {
-				searchSpecifics += and + " Ratings.Title = '" + name + "'";
+				searchSpecifics += and + " Ratings.Title LIKE '%" + name + "%'";
 			}
 			if(startYear.length() == 4) {
 				searchSpecifics += and + " Ratings.Year >= " + startYear;
@@ -653,7 +656,11 @@ public class yamDB {
 		
 		@Override
 		public String toString() {
-			return "Result#: " + n + "    Movie Title: " + name + "    Release Date: " + year + "    Rating: " + rank + "    Genre: " + genre;
+			String theString = "Result#: " + n + "    Movie Title: " + name + "    Release Date: " + year + "    Rating: " + rank;
+			if(genre != null) {
+				theString += "    Genre: " + genre;
+			}
+			return theString;
 		}
 
 	}
