@@ -40,8 +40,12 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Random;
 
 public class yamDB {
+	
+	private static final int MAX_ROULETTE_CHOICE_RANGE = 100000;//(in titles)
+	private static final int QUERY_MAX_TIME = 15; //(in seconds)
 
 	private JFrame frame;
 	//private ButtonGroup menuButtonGroup;
@@ -92,12 +96,12 @@ public class yamDB {
 	 * Initialize the contents of the frame.
 	 */
 	private void initialize() {
-		frame = new JFrame("YAMDB");
+		frame = new JFrame("Yet Another Movie Database");
 		
 		frame.setBounds(100, 100, 900, 700);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		JPanel panel = new JPanel();
-	panel.setBackground(Color.white);
+		panel.setBackground(Color.white);
 	
 		//new
 		panel.setLayout(new GridBagLayout());
@@ -402,6 +406,7 @@ public class yamDB {
 	}
 	
 	public class ActionHandler implements ActionListener {
+
 		@Override
 		public void actionPerformed(ActionEvent e) {
 			myModel.removeAllElements();
@@ -411,6 +416,9 @@ public class yamDB {
 				Connection myCon = DriverManager.getConnection("jdbc:mysql://yamdb.ddns.net/yamdb?useSSL=false", "devs", "P@ssw0rd"); // replace world with the name of your database, put your password in ""
 				//2. Create a statement
 				Statement myStmt = myCon.createStatement();
+				
+				//How long the statement will wait for a return answer from the database.
+				myStmt.setQueryTimeout(QUERY_MAX_TIME);
 				
 				//3 Execute SQl query
 				String queryName = myJtxtFieldName.getText();
@@ -440,7 +448,7 @@ public class yamDB {
 				ResultSet rs = null;
 				System.out.println("Your SQL Query: " + completedQuery);
 				rs = myStmt.executeQuery(completedQuery);
-				
+				System.out.println("Query Finished!");
 				//4 GET RESULT SET BACK FROM SQL
 
 				int n = 1;
@@ -481,16 +489,22 @@ public class yamDB {
 				//5 DECIDE HOW MUCH OF RESULT SET TO PRINT TO USER (result set called "outputlist" here)
 				
 				if(outputList.size() > 0) {
+					//SEARCH (output all results)
 					if (mySearchButton.isSelected()) {
 						for(Title eachTitle : outputList)
 							myModel.addElement(eachTitle.toString());
 					}
 					//If we are in Roulette Mode, just give more popular one for now...
 					// TODO Auto-generated method stub
+					//ROULETTE (output one result)
 					else if (myRouleteButton.isSelected()) {
 						myModel.addElement("Our reccomendation to you is.... ");
-						myModel.addElement(outputList.get(0).toString());
+						int searchRange = Math.min(outputList.size(), MAX_ROULETTE_CHOICE_RANGE);
+						Random rand = new Random();
+						int index = rand.nextInt(searchRange);
+						myModel.addElement(outputList.get(index).toString());
 					}
+					//PREDICT
 					else if (myPredictorButton.isSelected()) {
 						// TODO Auto-generated method stub
 					}
@@ -504,7 +518,7 @@ public class yamDB {
      	            }*/
 			} 
 			catch (SQLException g) {
-				System.err.println("Yo' Shit Didn't Run Main! You need to find this code and fix it up real good!!!");
+				System.err.println("Error with relation to Database. Caught in catchblock at end of actionPerformed().");
 				g.printStackTrace();
 			}
 		}
@@ -533,9 +547,9 @@ public class yamDB {
 			if(endRank.length() > 0) {
 				searchSpecifics += and + " Ratings.Rank <= " + endRank;
 			}
-			if(genre != null && !genre.equals("Select Genre")) {
+			if(genre != null && !genre.equals("Select")) {
 				//I think this next line is nearly working, but it freezes... I don't know why... may just be too big? -David
-				//searchStatement = "SELECT Ratings.Title, Ratings.Year, Ratings.Rank, Ratings.Votes, Genres.Genres FROM Ratings INNER JOIN Genres";
+				searchStatement = "SELECT Ratings.Title, Ratings.Year, Ratings.Rank, Ratings.Votes, Genres.Genre FROM Ratings INNER JOIN Genres";
 				//This Sprint (Sprint 3)
 				// TODO method stub
 				//System.out.println("Genres isn't workign here yet, but you chose: " + genre);
