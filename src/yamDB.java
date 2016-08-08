@@ -462,17 +462,17 @@ public class yamDB {
 					String resultRating = rs.getString("Rank");
 					String resultVotes = rs.getString("Votes");
 					//ONCE GENRE IS WORKING FOR SEARCH
-					String genre = rs.getString("Genre");
+					//String genre = rs.getString("Genre");
 					
 					if(mySearchButton.isSelected()) {
-						currentTitle = new Title(n, resultName, Integer.parseInt(resultYear), Integer.parseInt(resultRating), Integer.parseInt(resultVotes), genre);
+						currentTitle = new Title(n, resultName, Integer.parseInt(resultYear), Integer.parseInt(resultRating), Integer.parseInt(resultVotes));
 						//outputString += ". Movie Title: " + resultName + "    Release Date: " + resultYear + "    Rating: " + resultRating + "    Votes: " + resultVotes;
 						//currentTitle = new Title(n, resultName, Integer.parseInt(resultYear), genre);
 					}
 					else if (myRouleteButton.isSelected()) {
 						//Use if-statement above as a guide
 						//This Sprint (Sprint 3)
-						currentTitle = new Title(n, resultName, Integer.parseInt(resultYear), Integer.parseInt(resultRating), Integer.parseInt(resultVotes), genre);
+						currentTitle = new Title(n, resultName, Integer.parseInt(resultYear), Integer.parseInt(resultRating), Integer.parseInt(resultVotes));
 						//outputString += ". Movie Title: " + resultName + "    Release Date: " + resultYear + "    Rating: " + resultRating + "    Votes: " + resultVotes;
 						// TODO Auto-generated method stub
 					}
@@ -532,7 +532,7 @@ public class yamDB {
 			String and = " AND";
 			
 			if(name.length() > 0) {
-				searchSpecifics += and + " Ratings.Title = '" + name + "'";
+				searchSpecifics += and + " Ratings.Title LIKE '" + name + "'";
 			}
 			if(startYear.length() == 4) {
 				searchSpecifics += and + " Ratings.Year >= " + startYear;
@@ -546,15 +546,15 @@ public class yamDB {
 			if(endRank.length() > 0) {
 				searchSpecifics += and + " Ratings.Rank <= " + endRank;
 			}
-			if(genre != null && !genre.equals("Select")) {
-				System.out.println("GENRE: " + genre);
-				searchSpecifics += and + " Genres.Genre = '" + genre + "'";
-				//I think this next line is nearly working, but it freezes... I don't know why... may just be too big? -David
-				searchStatement = "SELECT Ratings.Title, Ratings.Year, Ratings.Rank, Ratings.Votes, Genres.Genre FROM Ratings INNER JOIN Genres ON Ratings.MovieID = Genres.MovieID";
-				//This Sprint (Sprint 3)
-				// TODO method stub
-				//System.out.println("Genres isn't workign here yet, but you chose: " + genre);
-			}
+//			if(genre != null && !genre.equals("Select")) {
+//				System.out.println("GENRE: " + genre);
+//				searchSpecifics += and + " Genres.Genre = '" + genre + "'";
+//				//I think this next line is nearly working, but it freezes... I don't know why... may just be too big? -David
+//				searchStatement = "SELECT Ratings.Title, Ratings.Year, Ratings.Rank, Ratings.Votes, Genres.Genre FROM Ratings INNER JOIN Genres ON Ratings.MovieID = Genres.MovieID";
+//				//This Sprint (Sprint 3)
+//				// TODO method stub
+//				//System.out.println("Genres isn't workign here yet, but you chose: " + genre);
+//			}
 
 			//SELECT Ratings.Title, Ratings.Rank, Ratings.Votes, Ratings.Year, Genres.Genres FROM
 			//Ratings INNER JOIN Genres Where Ratings.Year >= 1992 AND Ratings.Year <= 1995 AND
@@ -587,14 +587,14 @@ public class yamDB {
 			if(endRank.length() > 0) {
 				searchSpecifics += and + " Ratings.Rank <= " + endRank;
 			}
-			if(genre != null && !genre.equals("Select")) {
-				searchSpecifics += and + " Genres.Genre = '" + genre + "'";
-				//I think this next line is nearly working, but it freezes... I don't know why... may just be too big? -David
-				searchStatement = "SELECT Ratings.Title, Ratings.Year, Ratings.Rank, Ratings.Votes, Genres.Genre FROM Ratings INNER JOIN Genres ON Ratings.MovieID = Genres.MovieID";
-				//This Sprint (Sprint 3)
-				// TODO method stub
-				//System.out.println("Genres isn't workign here yet, but you chose: " + genre);
-			}
+//			if(genre != null && !genre.equals("Select")) {
+//				searchSpecifics += and + " Genres.Genre = '" + genre + "'";
+//				//I think this next line is nearly working, but it freezes... I don't know why... may just be too big? -David
+//				searchStatement = "SELECT Ratings.Title, Ratings.Year, Ratings.Rank, Ratings.Votes, Genres.Genre FROM Ratings INNER JOIN Genres ON Ratings.MovieID = Genres.MovieID";
+//				//This Sprint (Sprint 3)
+//				// TODO method stub
+//				//System.out.println("Genres isn't workign here yet, but you chose: " + genre);
+//			}
 
 			if(searchSpecifics.length() > 0) {
 				searchStatement += " WHERE" + searchSpecifics.substring(and.length(), searchSpecifics.length());
