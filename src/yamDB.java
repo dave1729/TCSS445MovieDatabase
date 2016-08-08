@@ -195,7 +195,7 @@ public class yamDB {
 		JLabel ratingsfromlb = new JLabel("Rating FROM ");
 		myRatingsfrom = new JComboBox<String>();
 		ArrayList<Integer> ratingsfromList = new ArrayList<Integer>();
-		myRatingsfrom.addItem("Select");
+		myRatingsfrom.addItem("");
 		for(int i = 1; i < 11; i++){
 			ratingsfromList.add(i);
 			myRatingsfrom.addItem(i + "");
@@ -209,7 +209,7 @@ public class yamDB {
 		JLabel ratingstolb = new JLabel(" TO ");
 		myRatingsto = new JComboBox<String>();
 		ArrayList<Integer> ratingstoList = new ArrayList<Integer>();
-		myRatingsto.addItem("Select");
+		myRatingsto.addItem("");
 		for(int i = 1; i < 11; i++){
 			ratingstoList.add(i);
 			myRatingsto.addItem(i + "");
