@@ -140,6 +140,10 @@ public class yamDB {
 		myRouleteButton = new JRadioButton(" PLAY ROULETTE");
 		myPredictorButton = new JRadioButton(" USE PREDICTOR");
 		
+		mySearchButton.setBackground(Color.white);
+		myRouleteButton.setBackground(Color.white);
+		myPredictorButton.setBackground(Color.white);
+		
 		innerPan1.add(radiolb);
 		
 		menuButtonGroup.add(mySearchButton);
@@ -258,7 +262,7 @@ public class yamDB {
 	        public void actionPerformed(ActionEvent e) {
 	        	myJtxtFieldName.setEnabled(false);
 	        	myButtonSearch.setText("ROULETTE");
-
+				lb1.setText("Production Company ");
 	        }
 	    });
 		
@@ -267,6 +271,7 @@ public class yamDB {
 	        public void actionPerformed(ActionEvent e) {
 	        	myJtxtFieldName.setEnabled(true);
 	        	myButtonSearch.setText("SEARCH");
+				lb1.setText("Movie Title ");
 	        }
 	    });
 		
@@ -274,6 +279,7 @@ public class yamDB {
 	        @Override
 	        public void actionPerformed(ActionEvent e) {
 	        	myButtonSearch.setText("PREDICT");
+				lb1.setText("Production Company ");
 	        }
 	    });
 		
