@@ -52,7 +52,7 @@ public class yamDB {
 	private JRadioButton mySearchButton;
 	private JRadioButton myRouleteButton;
 	private JRadioButton myPredictorButton;
-	private JTextField myJtxtFieldName;
+	private JTextField myJtxtFieldNameOrPC;
 	private JTextField myJtxtFieldActor;
 	private JTextField myJtxtFieldYearFrom;
 	private JTextField myJtxtFieldYearTo;
@@ -167,9 +167,9 @@ public class yamDB {
 		innerPan.setBackground(Color.white);
 		innerPan.setLayout(new BoxLayout(innerPan, BoxLayout.X_AXIS));
 		JLabel lb1 = new JLabel("Movie Title  ");
-		myJtxtFieldName = new JTextField();
+		myJtxtFieldNameOrPC = new JTextField();
 		innerPan.add(lb1);
-		innerPan.add(myJtxtFieldName);
+		innerPan.add(myJtxtFieldNameOrPC);
 
 		//year from
 		JPanel innerPan2 = new JPanel();
@@ -253,14 +253,15 @@ public class yamDB {
 		
 		//listeners
 		myButtonSearch.addActionListener(handler);
-		myJtxtFieldName.addActionListener(handler);
+		myJtxtFieldNameOrPC.addActionListener(handler);
 		myJtxtFieldYearFrom.addActionListener(handler);
 		innerPan6.add(myButtonSearch,BorderLayout.CENTER);
 		
 		myRouleteButton.addActionListener(new ActionListener() {
 	        @Override
 	        public void actionPerformed(ActionEvent e) {
-	        	myJtxtFieldName.setEnabled(false);
+	        	myJtxtFieldNameOrPC.setEnabled(false);
+	        	myJtxtFieldActor.setEnabled(false);
 	        	myButtonSearch.setText("ROULETTE");
 				lb1.setText("Production Company ");
 	        }
@@ -269,7 +270,8 @@ public class yamDB {
 		mySearchButton.addActionListener(new ActionListener() {
 	        @Override
 	        public void actionPerformed(ActionEvent e) {
-	        	myJtxtFieldName.setEnabled(true);
+	        	myJtxtFieldNameOrPC.setEnabled(true);
+	        	myJtxtFieldActor.setEnabled(false);
 	        	myButtonSearch.setText("SEARCH");
 				lb1.setText("Movie Title ");
 	        }
@@ -278,6 +280,8 @@ public class yamDB {
 		myPredictorButton.addActionListener(new ActionListener() {
 	        @Override
 	        public void actionPerformed(ActionEvent e) {
+	        	myJtxtFieldActor.setEnabled(true);
+	        	myJtxtFieldNameOrPC.setEnabled(true);
 	        	myButtonSearch.setText("PREDICT");
 				lb1.setText("Production Company ");
 	        }
@@ -427,34 +431,59 @@ public class yamDB {
 				myStmt.setQueryTimeout(QUERY_MAX_TIME);
 				
 				//3 Execute SQl query
-				String queryName = myJtxtFieldName.getText();
+				String queryNameOrPC = myJtxtFieldNameOrPC.getText();
 				String queryStartYear = myJtxtFieldYearFrom.getText();
 				String queryEndYear = myJtxtFieldYearTo.getText();
 				String queryStartRank = (String) myRatingsfrom.getSelectedItem();
 				String queryEndRank = (String) myRatingsto.getSelectedItem();
 				String queryGenre = (String) myGenre.getSelectedItem();
-				String completedQuery = "";
+				String queryActor = myJtxtFieldActor.getText();
+				
+				String queryStatement = "";
+				
+				ResultSet rs = null;
+				
 				if(mySearchButton.isSelected()) {
-					completedQuery = createSearchQuery(queryName, queryStartYear, queryEndYear, queryStartRank.trim(), queryEndRank.trim(), queryGenre);
+					queryStatement = createSearchQuery(queryNameOrPC, queryStartYear, queryEndYear, queryStartRank.trim(), queryEndRank.trim(), queryGenre);
+					
+					System.out.println("Your SQL Query: " + queryStatement);
+					rs = myStmt.executeQuery(queryStatement);
 				}
 				else if (myRouleteButton.isSelected()) {
+					queryStatement = createRouletteQuery(queryStartYear, queryEndYear, queryStartRank.trim(), queryEndRank.trim(), queryGenre);
 					
-					completedQuery = createRouletteQuery(queryStartYear, queryEndYear, queryStartRank.trim(), queryEndRank.trim(), queryGenre);
+					System.out.println("Your SQL Query: " + queryStatement);
+					rs = myStmt.executeQuery(queryStatement);
 				}
 				else if (myPredictorButton.isSelected()) {
-					completedQuery = createPredictorQuery();
+					//Create View Statement
+					String manipulationStatement = "";
+					System.out.println("Actor Name: " + queryActor + ".");
+					if(queryActor != null && queryActor.length() > 0) {
+						manipulationStatement = "CREATE VIEW MyActor AS SELECT * FROM Actors WHERE Actors.Name = '" + queryActor + "';";
+					}
+					else {
+						manipulationStatement = "CREATE VIEW MyPC AS SELECT * FROM ProductionCompanies WHERE ProductionCompanies.ProductionCompany LIKE '%" + queryNameOrPC + "%';";
+					}
+					//Create Query Statement
+					queryStatement = createPredictorQuery(queryNameOrPC, queryStartYear, queryEndYear, queryActor);
+					
+					System.out.println("Your SQL Query: " + queryStatement);
+					System.out.println("CREATE VIEW SUCCESS: " + myStmt.execute(manipulationStatement));
+					rs = myStmt.executeQuery(queryStatement);
 				}
-
-
-				/*String query = "select * from test WHERE name = ?";
-     			PreparedStatement pst = (PreparedStatement) myCon.prepareStatement(query);
-     			pst.setString(1, "%" + searchText + "%");
-     			ResultSet rs = pst.executeQuery();*/
+				System.out.println("Query Complete!");
 				
-				//completedQuery = "SELECT * FROM Genres WHERE Genre = 'Drama'";
-				System.out.println("Your SQL Query: " + completedQuery);
-				ResultSet rs = myStmt.executeQuery(completedQuery);
-				System.out.println("Query Finished!");
+				/*
+				CREATE VIEW MyActor AS SELECT * FROM Actors WHERE Actors.Name = 'Jones, Alex';
+				SELECT MyActor.ActorID, MyActor.Name, Ratings.Title, Ratings.Year, Ratings.Rank, Ratings.Votes FROM MyActor INNER JOIN Ratings ON Ratings.MovieID = MyActor.MovieID ORDER BY MyActor.ActorID ASC, Ratings.Votes DESC;
+				DROP VIEW MyActor;
+
+				CREATE VIEW MyPC AS SELECT * FROM ProductionCompanies WHERE ProductionCompanies.ProductionCompany LIKE '%Sony%';
+				SELECT MyPC.ProductionCompany, Ratings.Title, Ratings.Year, Ratings.Rank, Ratings.Votes FROM MyPC INNER JOIN Ratings ON Ratings.MovieID = MyPC.MovieID ORDER BY MyPC.ProductionCompany ASC, Ratings.Votes DESC;
+				DROP VIEW MyPC;
+				*/
+				
 				//4 GET RESULT SET BACK FROM SQL
 
 				int n = 1;
@@ -475,25 +504,30 @@ public class yamDB {
 					
 					if(mySearchButton.isSelected()) {
 						currentTitle = new Title(n, resultName, Integer.parseInt(resultYear), Integer.parseInt(resultRating), Integer.parseInt(resultVotes), genre);
-						//outputString += ". Movie Title: " + resultName + "    Release Date: " + resultYear + "    Rating: " + resultRating + "    Votes: " + resultVotes;
-						//currentTitle = new Title(n, resultName, Integer.parseInt(resultYear), genre);
 					}
 					else if (myRouleteButton.isSelected()) {
-						//Use if-statement above as a guide
-						//This Sprint (Sprint 3)
 						currentTitle = new Title(n, resultName, Integer.parseInt(resultYear), Integer.parseInt(resultRating), Integer.parseInt(resultVotes), genre);
-						//outputString += ". Movie Title: " + resultName + "    Release Date: " + resultYear + "    Rating: " + resultRating + "    Votes: " + resultVotes;
-						// TODO Auto-generated method stub
 					}
 					else if (myPredictorButton.isSelected()) {
-						//LAST SPRINT (SPRINT 4)
-						//outputString +=
-						// TODO Auto-generated method stub
+						if(queryActor.length() > 0) {
+							currentTitle = new Title(n, rs.getString("ActorID"), rs.getString("Name"), resultName, Integer.parseInt(resultYear), Integer.parseInt(resultRating), Integer.parseInt(resultVotes));
+						}
+						else {
+							currentTitle = new Title(n, rs.getString("ProductionCompany"), resultName, Integer.parseInt(resultYear), Integer.parseInt(resultRating), Integer.parseInt(resultVotes));
+						}
 					}
 					
 					n++;
 					outputList.add(currentTitle);
 
+				}
+				
+				//Create Drop Statement
+				if(myPredictorButton.isSelected() && queryActor != null && queryActor.length() > 0) {
+					myStmt.execute("DROP VIEW MyActor;");
+				}
+				else if (myPredictorButton.isSelected()) {
+					myStmt.execute("DROP VIEW MyPC;");
 				}
 				
 				//5 DECIDE HOW MUCH OF RESULT SET TO PRINT TO USER (result set called "outputlist" here)
@@ -514,7 +548,8 @@ public class yamDB {
 					}
 					//PREDICT
 					else if (myPredictorButton.isSelected()) {
-						// TODO Auto-generated method stub
+						for(Title eachTitle : outputList)
+							myModel.addElement(eachTitle.toString());
 					}
 				}
 				else {
@@ -612,13 +647,46 @@ public class yamDB {
 			return searchStatement + " ORDER BY Ratings.Votes DESC;";
 		}
 		
+		/*
+		CREATE VIEW MyActor AS SELECT * FROM Actors WHERE Actors.Name = 'Jones, Alex';
+		SELECT MyActor.ActorID, MyActor.Name, Ratings.Title, Ratings.Year, Ratings.Rank, Ratings.Votes FROM MyActor INNER JOIN Ratings ON Ratings.MovieID = MyActor.MovieID ORDER BY MyActor.ActorID ASC, Ratings.Votes DESC;
+		DROP VIEW MyActor;
+
+		CREATE VIEW MyPC AS SELECT * FROM ProductionCompanies WHERE ProductionCompanies.ProductionCompany LIKE '%Sony%';
+		SELECT MyPC.ProductionCompany, Ratings.Title, Ratings.Year, Ratings.Rank, Ratings.Votes FROM MyPC INNER JOIN Ratings ON Ratings.MovieID = MyPC.MovieID ORDER BY MyPC.ProductionCompany ASC, Ratings.Votes DESC;
+		DROP VIEW MyPC;
+		*/
 		
 		//Generates a SQL Predictor query (goal being to have the user select an Actor OR a Production Company then also add
 		// year range they are interested in, to see
-		private String createPredictorQuery() {
-			//LAST SPRINT (SPRINT 4)
-			// TODO Auto-generated method stub
-			return null;
+		private String createPredictorQuery(String queryNameOrPC, String startYear, String endYear, String queryActor) {
+			String view = "MyPC";
+			String searchStatement = "SELECT MyPC.ProductionCompany, Ratings.Title, Ratings.Year, Ratings.Rank, Ratings.Votes FROM "
+					+ "MyPC INNER JOIN Ratings ON Ratings.MovieID = MyPC.MovieID ORDER BY MyPC.ProductionCompany ASC, Ratings.Votes DESC;";
+
+			if(queryActor != null && queryActor.length() > 0) {
+				view = "MyActor";
+				searchStatement = "SELECT MyActor.ActorID, MyActor.Name, Ratings.Title, Ratings.Year, Ratings.Rank, Ratings.Votes FROM "
+						+ "MyActor INNER JOIN Ratings ON Ratings.MovieID = MyActor.MovieID ORDER BY MyActor.ActorID ASC, Ratings.Votes DESC;";
+			}
+			
+			String searchSpecifics = "";
+
+			//also search date if we were sent one
+			String and = " AND";
+			
+//			if(startYear.length() == 4) {
+//				searchSpecifics += and + " Ratings.Year >= " + startYear;
+//			}
+//			if(endYear.length() == 4) {
+//				searchSpecifics += and + " Ratings.Year <= " + endYear;
+//			}
+
+			if(searchSpecifics.length() > 0) {
+				searchStatement += " WHERE" + searchSpecifics.substring(and.length(), searchSpecifics.length());
+			}
+			
+			return searchStatement;
 		}
 		
 	}
@@ -626,11 +694,14 @@ public class yamDB {
 	public class Title {
 		
 		private int n;
+		private String actorID;
 		private String name;
 		private int year;
 		private int rank;
 		private int votes;
 		private String genre;
+		private String pc;
+		private String title;
 		
 		public Title(int n, String name, int year, String genre) {
 			this.n = n;
@@ -638,8 +709,9 @@ public class yamDB {
 			this.genre = genre;
 		}
 
-		public Title(int n, String name, int year, int rank, int votes) {
+		public Title(int n, String pc, String name, int year, int rank, int votes) {
 			this.n = n;
+			this.actorID = null;
 			this.name = name;
 			this.year = year;
 			this.rank = rank;
@@ -656,6 +728,26 @@ public class yamDB {
 			this.genre = genre;
 		}
 		
+		public Title(int n, String pc, String name, int year, int rank, int votes, String genre) {
+			this.n = n;
+			this.actorID = null;
+			this.name = name;
+			this.year = year;
+			this.rank = rank;
+			this.votes = votes;
+			this.genre = genre;
+		}
+		
+		public Title(int n, String actorID, String name, String title, int year, int rank, int votes) {
+			this.n = n;
+			this.actorID = actorID;
+			this.name = name;
+			this.title = title;
+			this.year = year;
+			this.rank = rank;
+			this.votes = votes;
+		}
+
 		public int getVotes() {
 			return votes;
 		}
