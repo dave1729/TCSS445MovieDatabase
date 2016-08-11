@@ -522,7 +522,7 @@ public class yamDB {
 
 				}
 				
-				//Create Drop Statement
+				//Create Drop Statement, if we created a view earlier
 				if(myPredictorButton.isSelected() && queryActor != null && queryActor.length() > 0) {
 					myStmt.execute("DROP VIEW MyActor;");
 				}
@@ -549,7 +549,7 @@ public class yamDB {
 					//PREDICT
 					else if (myPredictorButton.isSelected()) {
 						for(Title eachTitle : outputList)
-							myModel.addElement(eachTitle.toString());
+							myModel.addElement(eachTitle.toString() + "    Production Company: " + eachTitle.getPC());
 					}
 				}
 				else {
@@ -662,12 +662,12 @@ public class yamDB {
 		private String createPredictorQuery(String queryNameOrPC, String startYear, String endYear, String queryActor) {
 			String view = "MyPC";
 			String searchStatement = "SELECT MyPC.ProductionCompany, Ratings.Title, Ratings.Year, Ratings.Rank, Ratings.Votes FROM "
-					+ "MyPC INNER JOIN Ratings ON Ratings.MovieID = MyPC.MovieID ORDER BY MyPC.ProductionCompany ASC, Ratings.Votes DESC;";
+					+ "MyPC INNER JOIN Ratings ON Ratings.MovieID = MyPC.MovieID";
 
 			if(queryActor != null && queryActor.length() > 0) {
 				view = "MyActor";
 				searchStatement = "SELECT MyActor.ActorID, MyActor.Name, Ratings.Title, Ratings.Year, Ratings.Rank, Ratings.Votes FROM "
-						+ "MyActor INNER JOIN Ratings ON Ratings.MovieID = MyActor.MovieID ORDER BY MyActor.ActorID ASC, Ratings.Votes DESC;";
+						+ "MyActor INNER JOIN Ratings ON Ratings.MovieID = MyActor.MovieID";
 			}
 			
 			String searchSpecifics = "";
@@ -675,15 +675,23 @@ public class yamDB {
 			//also search date if we were sent one
 			String and = " AND";
 			
-//			if(startYear.length() == 4) {
-//				searchSpecifics += and + " Ratings.Year >= " + startYear;
-//			}
-//			if(endYear.length() == 4) {
-//				searchSpecifics += and + " Ratings.Year <= " + endYear;
-//			}
+			if(startYear.length() == 4) {
+				searchSpecifics += and + " Ratings.Year >= " + startYear;
+			}
+			if(endYear.length() == 4) {
+				searchSpecifics += and + " Ratings.Year <= " + endYear;
+			}
 
 			if(searchSpecifics.length() > 0) {
 				searchStatement += " WHERE" + searchSpecifics.substring(and.length(), searchSpecifics.length());
+			}
+			
+			if(queryActor != null && queryActor.length() > 0) {
+				searchStatement += " ORDER BY MyActor.ActorID ASC, Ratings.Votes DESC;";
+			}
+			else {
+				//searchStatement += " ORDER BY MyPC.ProductionCompany ASC, Ratings.Votes DESC;";
+				searchStatement += " ORDER BY MyPC.ProductionCompany ASC;";
 			}
 			
 			return searchStatement;
@@ -709,6 +717,10 @@ public class yamDB {
 			this.genre = genre;
 		}
 
+		public String getPC() {
+			return pc;
+		}
+
 		public Title(int n, String pc, String name, int year, int rank, int votes) {
 			this.n = n;
 			this.actorID = null;
@@ -716,6 +728,7 @@ public class yamDB {
 			this.year = year;
 			this.rank = rank;
 			this.votes = votes;
+			this.pc = pc;
 			this.genre = null;
 		}
 
@@ -735,6 +748,7 @@ public class yamDB {
 			this.year = year;
 			this.rank = rank;
 			this.votes = votes;
+			this.pc = pc;
 			this.genre = genre;
 		}
 		
