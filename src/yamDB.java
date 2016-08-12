@@ -262,6 +262,9 @@ public class yamDB {
 	        public void actionPerformed(ActionEvent e) {
 	        	myJtxtFieldNameOrPC.setEnabled(false);
 	        	myJtxtFieldActor.setEnabled(false);
+	        	myGenre.setEnabled(true);
+	        	myRatingsfrom.setEnabled(true);
+	        	myRatingsto.setEnabled(true);
 	        	myButtonSearch.setText("ROULETTE");
 				lb1.setText("Production Company ");
 	        }
@@ -272,6 +275,9 @@ public class yamDB {
 	        public void actionPerformed(ActionEvent e) {
 	        	myJtxtFieldNameOrPC.setEnabled(true);
 	        	myJtxtFieldActor.setEnabled(false);
+	        	myGenre.setEnabled(true);
+	        	myRatingsfrom.setEnabled(true);
+	        	myRatingsto.setEnabled(true);
 	        	myButtonSearch.setText("SEARCH");
 				lb1.setText("Movie Title ");
 	        }
@@ -282,6 +288,12 @@ public class yamDB {
 	        public void actionPerformed(ActionEvent e) {
 	        	myJtxtFieldActor.setEnabled(true);
 	        	myJtxtFieldNameOrPC.setEnabled(true);
+	        	myGenre.setSelectedIndex(0);
+	        	myRatingsfrom.setSelectedIndex(0);
+	        	myRatingsto.setSelectedIndex(0);
+	        	myGenre.setEnabled(true);
+	        	myRatingsfrom.setEnabled(false);
+	        	myRatingsto.setEnabled(false);
 	        	myButtonSearch.setText("PREDICT");
 				lb1.setText("Production Company ");
 	        }
@@ -469,7 +481,7 @@ public class yamDB {
 					queryStatement = createPredictorQuery(queryNameOrPC, queryStartYear, queryEndYear, queryActor);
 					
 					System.out.println("Your SQL Query: " + queryStatement);
-					System.out.println("CREATE VIEW SUCCESS: " + myStmt.execute(manipulationStatement));
+					myStmt.execute(manipulationStatement);
 					rs = myStmt.executeQuery(queryStatement);
 				}
 				System.out.println("Query Complete!");
@@ -548,8 +560,43 @@ public class yamDB {
 					}
 					//PREDICT
 					else if (myPredictorButton.isSelected()) {
-						for(Title eachTitle : outputList)
-							myModel.addElement(eachTitle.toString() + "    Production Company: " + eachTitle.getPC());
+						outputList.add(new Title());
+
+						if(queryActor.length() > 0 && outputList.size() > 0) {
+							String previousID = "";
+							String actorName = "";
+							int totalRating = 0;
+							int numberTitles = 0;
+							
+							for(Title eachTitle : outputList)
+								if(previousID.equals("")) {
+									previousID = eachTitle.getID();
+									actorName = eachTitle.getName();
+									totalRating = eachTitle.getRank();
+									numberTitles = 1;
+								}
+								else if(eachTitle.getID().equals(previousID)) {
+									totalRating += eachTitle.getRank();
+									previousID = eachTitle.getID();
+									numberTitles++;
+									myModel.addElement("ActorID: " + eachTitle.getID() + "    " + eachTitle.toString() + "    Production Company: " + eachTitle.getPC());
+								}
+								else if(eachTitle.getID().equals("?")) {
+									//do nothing
+								}
+								else {
+									myModel.addElement("For Actor: " + actorName + "  ID: " + previousID + "   Average Rating: " + (1.0 * totalRating) / numberTitles);
+									previousID = eachTitle.getID();
+									actorName = eachTitle.getName();
+									totalRating = eachTitle.getRank();
+									numberTitles = 1;
+									myModel.addElement("ActorID: " + eachTitle.getID() + "    " + eachTitle.toString() + "    Production Company: " + eachTitle.getPC());
+								}
+						}
+						else if (outputList.size() > 0) {
+							
+						}
+						
 					}
 				}
 				else {
@@ -717,6 +764,18 @@ public class yamDB {
 			this.genre = genre;
 		}
 
+		public String getName() {
+			return this.name;
+		}
+
+		public int getRank() {
+			return this.rank;
+		}
+
+		public String getID() {
+			return this.actorID;
+		}
+
 		public String getPC() {
 			return pc;
 		}
@@ -760,6 +819,10 @@ public class yamDB {
 			this.year = year;
 			this.rank = rank;
 			this.votes = votes;
+		}
+
+		public Title() {
+			this.actorID = "?";
 		}
 
 		public int getVotes() {
