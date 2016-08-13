@@ -193,6 +193,7 @@ public class yamDB {
 		JLabel actorlb = new JLabel("Actor's Name  ");
 		myJtxtFieldActor = new JTextField();
 		innerPan3.add(actorlb);
+		actorlb.setToolTipText("Actor's Name: Last, First");
 		innerPan3.add(myJtxtFieldActor);
 		myJtxtFieldActor.setEnabled(false);
 
@@ -260,7 +261,9 @@ public class yamDB {
 		myRouleteButton.addActionListener(new ActionListener() {
 	        @Override
 	        public void actionPerformed(ActionEvent e) {
+	        	myJtxtFieldNameOrPC.setText("");
 	        	myJtxtFieldNameOrPC.setEnabled(false);
+	        	myJtxtFieldActor.setText("");
 	        	myJtxtFieldActor.setEnabled(false);
 	        	myGenre.setEnabled(true);
 	        	myRatingsfrom.setEnabled(true);
@@ -274,6 +277,7 @@ public class yamDB {
 	        @Override
 	        public void actionPerformed(ActionEvent e) {
 	        	myJtxtFieldNameOrPC.setEnabled(true);
+	        	myJtxtFieldActor.setText("");
 	        	myJtxtFieldActor.setEnabled(false);
 	        	myGenre.setEnabled(true);
 	        	myRatingsfrom.setEnabled(true);
@@ -291,10 +295,10 @@ public class yamDB {
 	        	myGenre.setSelectedIndex(0);
 	        	myRatingsfrom.setSelectedIndex(0);
 	        	myRatingsto.setSelectedIndex(0);
-	        	myGenre.setEnabled(true);
+	        	myGenre.setEnabled(false);
 	        	myRatingsfrom.setEnabled(false);
 	        	myRatingsto.setEnabled(false);
-	        	myButtonSearch.setText("PREDICT");
+	        	myButtonSearch.setText("SEARCH");
 				lb1.setText("Production Company ");
 	        }
 	    });
@@ -468,11 +472,15 @@ public class yamDB {
 					rs = myStmt.executeQuery(queryStatement);
 				}
 				else if (myPredictorButton.isSelected()) {
+					
+					//Check For Any Views Here, if any views exist, drop them. (don't know if this check is possible or easy)
+					// TODO method stub
+					
 					//Create View Statement
 					String manipulationStatement = "";
 					System.out.println("Actor Name: " + queryActor + ".");
 					if(queryActor != null && queryActor.length() > 0) {
-						manipulationStatement = "CREATE VIEW MyActor AS SELECT * FROM Actors WHERE Actors.Name = '" + queryActor + "';";
+						manipulationStatement = "CREATE VIEW MyActor AS SELECT * FROM Actors WHERE Actors.Name LIKE '" + queryActor + "';";
 					}
 					else {
 						manipulationStatement = "CREATE VIEW MyPC AS SELECT * FROM ProductionCompanies WHERE ProductionCompanies.ProductionCompany LIKE '%" + queryNameOrPC + "%';";
@@ -504,28 +512,23 @@ public class yamDB {
 					
 					Title currentTitle = null;
 					
-					String resultName = rs.getString("Title");
-					String resultYear = rs.getString("Year").substring(0, 4);
-					String resultRating = rs.getString("Rank");
-					String resultVotes = rs.getString("Votes");
-					//ONCE GENRE IS WORKING FOR SEARCH
 					String genre = null;
 					if(queryGenre != null && !queryGenre.equals("Select")) {
 						genre = rs.getString("Genre");
 					}
 					
 					if(mySearchButton.isSelected()) {
-						currentTitle = new Title(n, resultName, Integer.parseInt(resultYear), Integer.parseInt(resultRating), Integer.parseInt(resultVotes), genre);
+						currentTitle = new Title(n, rs.getString("Title"), rs.getString("Year").substring(0, 4), rs.getString("Rank"), rs.getString("Votes"), genre);
 					}
 					else if (myRouleteButton.isSelected()) {
-						currentTitle = new Title(n, resultName, Integer.parseInt(resultYear), Integer.parseInt(resultRating), Integer.parseInt(resultVotes), genre);
+						currentTitle = new Title(n, rs.getString("Title"), rs.getString("Year").substring(0, 4), rs.getString("Rank"), rs.getString("Votes"), genre);
 					}
 					else if (myPredictorButton.isSelected()) {
 						if(queryActor.length() > 0) {
-							currentTitle = new Title(n, rs.getString("ActorID"), rs.getString("Name"), resultName, Integer.parseInt(resultYear), Integer.parseInt(resultRating), Integer.parseInt(resultVotes));
+							currentTitle = new Title(n, rs.getString("Title"), rs.getString("Year").substring(0, 4), rs.getString("Rank"), rs.getString("Votes"), rs.getString("ActorID"), rs.getString("Name"));
 						}
 						else {
-							currentTitle = new Title(n, rs.getString("ProductionCompany"), resultName, Integer.parseInt(resultYear), Integer.parseInt(resultRating), Integer.parseInt(resultVotes));
+							currentTitle = new Title(rs.getString("Title"), rs.getString("Year").substring(0, 4), rs.getString("Rank"), rs.getString("Votes"), rs.getString("ProductionCompany"));
 						}
 					}
 					
@@ -562,6 +565,7 @@ public class yamDB {
 					else if (myPredictorButton.isSelected()) {
 						outputList.add(new Title());
 
+						//IF WE ARE RETURNING ACTOR INFORMATION
 						if(queryActor.length() > 0 && outputList.size() > 0) {
 							String previousID = "";
 							String actorName = "";
@@ -569,32 +573,72 @@ public class yamDB {
 							int numberTitles = 0;
 							
 							for(Title eachTitle : outputList)
+								//get first Title info
 								if(previousID.equals("")) {
 									previousID = eachTitle.getID();
-									actorName = eachTitle.getName();
-									totalRating = eachTitle.getRank();
+									actorName = eachTitle.getActorName();
+									totalRating = Integer.parseInt(eachTitle.getRank());
 									numberTitles = 1;
+									myModel.addElement(eachTitle.toString());
 								}
+								//If this is the same actor, record this movie, and continue getting total rank (used for average)
 								else if(eachTitle.getID().equals(previousID)) {
-									totalRating += eachTitle.getRank();
+									totalRating += Integer.parseInt(eachTitle.getRank());
 									previousID = eachTitle.getID();
 									numberTitles++;
-									myModel.addElement("ActorID: " + eachTitle.getID() + "    " + eachTitle.toString() + "    Production Company: " + eachTitle.getPC());
+									myModel.addElement(eachTitle.toString());
 								}
-								else if(eachTitle.getID().equals("?")) {
-									//do nothing
-								}
+								//If it's not the first, and the actorID shows a new actor now
 								else {
-									myModel.addElement("For Actor: " + actorName + "  ID: " + previousID + "   Average Rating: " + (1.0 * totalRating) / numberTitles);
-									previousID = eachTitle.getID();
-									actorName = eachTitle.getName();
-									totalRating = eachTitle.getRank();
-									numberTitles = 1;
-									myModel.addElement("ActorID: " + eachTitle.getID() + "    " + eachTitle.toString() + "    Production Company: " + eachTitle.getPC());
+									//Print Previous Actors Totals, then save new actor in next set of totals
+									double avg = (1.0 * totalRating) / numberTitles;
+									avg = Math.round(avg * 100) / 100.0;
+									myModel.addElement("TOTALS FOR ABOVE ACTOR --->    Name: " + actorName + "  ID: " + previousID + "   Average Rating: " + avg + " over " + numberTitles + " titles.");
+									//and start next set if this isn't the terminator title (telling us we are done)
+									if(!eachTitle.getID().equals("?")) {
+										previousID = eachTitle.getID();
+										actorName = eachTitle.getActorName();
+										totalRating = Integer.parseInt(eachTitle.getRank());
+										numberTitles = 1;
+										myModel.addElement(eachTitle.toString());
+									}
 								}
 						}
+						//IF WE ARE RETURNING PRODUCTION COMPANY INFORMATION
 						else if (outputList.size() > 0) {
+							String previousPC = "";
+							int totalRating = 0;
+							int numberTitles = 0;
 							
+							for(Title eachTitle : outputList)
+								//get first Title info
+								if(previousPC.equals("")) {
+									previousPC = eachTitle.getPC();
+									totalRating = Integer.parseInt(eachTitle.getRank());
+									numberTitles = 1;
+									myModel.addElement(eachTitle.toString());
+								}
+								//If this is the same actor, record this movie, and continue getting total rank (used for average)
+								else if(eachTitle.getPC().equals(previousPC)) {
+									totalRating += Integer.parseInt(eachTitle.getRank());
+									previousPC = eachTitle.getPC();
+									numberTitles++;
+									myModel.addElement(eachTitle.toString());
+								}
+								//If it's not the first, and the actorID shows a new actor now
+								else {
+									//Print Previous Actors Totals, then save new actor in next set of totals
+									double avg = (1.0 * totalRating) / numberTitles;
+									avg = Math.round(avg * 100) / 100.0;
+									myModel.addElement("TOTALS FOR ABOVE COMPANY --->    Name: " + previousPC + "   Average Rating: " + avg + " over " + numberTitles + " titles.");
+									//and start next set if this isn't the terminator title (telling us we are done)
+									if(!eachTitle.getPC().equals("?")) {
+										previousPC = eachTitle.getPC();
+										totalRating = Integer.parseInt(eachTitle.getRank());
+										numberTitles = 1;
+										myModel.addElement(eachTitle.toString());
+									}
+								}
 						}
 						
 					}
@@ -640,11 +684,7 @@ public class yamDB {
 			if(genre != null && !genre.equals("Select")) {
 				System.out.println("GENRE: " + genre);
 				searchSpecifics += and + " Genres.Genre = '" + genre + "'";
-				//I think this next line is nearly working, but it freezes... I don't know why... may just be too big? -David
 				searchStatement = "SELECT Ratings.Title, Ratings.Year, Ratings.Rank, Ratings.Votes, Genres.Genre FROM Ratings INNER JOIN Genres ON Ratings.MovieID = Genres.MovieID";
-				//This Sprint (Sprint 3)
-				// TODO method stub
-				//System.out.println("Genres isn't workign here yet, but you chose: " + genre);
 			}
 
 			//SELECT Ratings.Title, Ratings.Rank, Ratings.Votes, Ratings.Year, Genres.Genres FROM
@@ -680,11 +720,7 @@ public class yamDB {
 			}
 			if(genre != null && !genre.equals("Select")) {
 				searchSpecifics += and + " Genres.Genre = '" + genre + "'";
-				//I think this next line is nearly working, but it freezes... I don't know why... may just be too big? -David
 				searchStatement = "SELECT Ratings.Title, Ratings.Year, Ratings.Rank, Ratings.Votes, Genres.Genre FROM Ratings INNER JOIN Genres ON Ratings.MovieID = Genres.MovieID";
-				//This Sprint (Sprint 3)
-				// TODO method stub
-				//System.out.println("Genres isn't workign here yet, but you chose: " + genre);
 			}
 
 			if(searchSpecifics.length() > 0) {
@@ -707,12 +743,10 @@ public class yamDB {
 		//Generates a SQL Predictor query (goal being to have the user select an Actor OR a Production Company then also add
 		// year range they are interested in, to see
 		private String createPredictorQuery(String queryNameOrPC, String startYear, String endYear, String queryActor) {
-			String view = "MyPC";
 			String searchStatement = "SELECT MyPC.ProductionCompany, Ratings.Title, Ratings.Year, Ratings.Rank, Ratings.Votes FROM "
 					+ "MyPC INNER JOIN Ratings ON Ratings.MovieID = MyPC.MovieID";
 
 			if(queryActor != null && queryActor.length() > 0) {
-				view = "MyActor";
 				searchStatement = "SELECT MyActor.ActorID, MyActor.Name, Ratings.Title, Ratings.Year, Ratings.Rank, Ratings.Votes FROM "
 						+ "MyActor INNER JOIN Ratings ON Ratings.MovieID = MyActor.MovieID";
 			}
@@ -734,7 +768,7 @@ public class yamDB {
 			}
 			
 			if(queryActor != null && queryActor.length() > 0) {
-				searchStatement += " ORDER BY MyActor.ActorID ASC, Ratings.Votes DESC;";
+				searchStatement += " ORDER BY MyActor.ActorID ASC, Ratings.Year ASC;";
 			}
 			else {
 				//searchStatement += " ORDER BY MyPC.ProductionCompany ASC, Ratings.Votes DESC;";
@@ -749,26 +783,72 @@ public class yamDB {
 	public class Title {
 		
 		private int n;
+		private String title;
+		private String year;
+		private String rank;
+		private String votes;
 		private String actorID;
-		private String name;
-		private int year;
-		private int rank;
-		private int votes;
+		private String actorName;
 		private String genre;
 		private String pc;
-		private String title;
 		
-		public Title(int n, String name, int year, String genre) {
+		//Terminator Title Constructor
+		public Title() {
+			this.n = 0;
+			this.title = null;
+			this.year = null;
+			this.rank = null;
+			this.votes = null;
+			this.genre = null;
+			this.actorID = "?";
+			this.actorName = null;
+			this.pc = "?";
+		}
+		
+		//Search and Roulette Constructor
+		public Title(int n, String title, String year, String rank, String votes, String genre) {
 			this.n = n;
-			this.name = name;
+			this.title = title;
+			this.year = year;
+			this.rank = rank;
+			this.votes = votes;
 			this.genre = genre;
+			this.actorID = null;
+			this.actorName = null;
+			this.pc = null;
 		}
 
-		public String getName() {
-			return this.name;
+		//Predictor (Actor) Constructor
+		public Title(int n, String title, String year, String rank, String votes, String actorID, String ActorName) {
+			this.n = n;
+			this.title = title;
+			this.year = year;
+			this.rank = rank;
+			this.votes = votes;
+			this.genre = null;
+			this.actorID = actorID;
+			this.actorName = ActorName;
+			this.pc = null;
 		}
 
-		public int getRank() {
+		//Predictor (Production Company) Constructor
+		public Title(String title, String year, String rank, String votes, String pc) {
+			this.n = 0;
+			this.title = title;
+			this.year = year;
+			this.rank = rank;
+			this.votes = votes;
+			this.genre = null;
+			this.actorID = null;
+			this.actorName = null;
+			this.pc = pc;
+		}
+
+		public String getActorName() {
+			return this.actorName;
+		}
+
+		public String getRank() {
 			return this.rank;
 		}
 
@@ -780,60 +860,33 @@ public class yamDB {
 			return pc;
 		}
 
-		public Title(int n, String pc, String name, int year, int rank, int votes) {
-			this.n = n;
-			this.actorID = null;
-			this.name = name;
-			this.year = year;
-			this.rank = rank;
-			this.votes = votes;
-			this.pc = pc;
-			this.genre = null;
-		}
-
-		public Title(int n, String name, int year, int rank, int votes, String genre) {
-			this.n = n;
-			this.name = name;
-			this.year = year;
-			this.rank = rank;
-			this.votes = votes;
-			this.genre = genre;
-		}
-		
-		public Title(int n, String pc, String name, int year, int rank, int votes, String genre) {
-			this.n = n;
-			this.actorID = null;
-			this.name = name;
-			this.year = year;
-			this.rank = rank;
-			this.votes = votes;
-			this.pc = pc;
-			this.genre = genre;
-		}
-		
-		public Title(int n, String actorID, String name, String title, int year, int rank, int votes) {
-			this.n = n;
-			this.actorID = actorID;
-			this.name = name;
-			this.title = title;
-			this.year = year;
-			this.rank = rank;
-			this.votes = votes;
-		}
-
-		public Title() {
-			this.actorID = "?";
-		}
-
-		public int getVotes() {
+		public String getVotes() {
 			return votes;
 		}
 		
 		@Override
 		public String toString() {
-			String theString = "Result#: " + n + "    Movie Title: " + name + "    Release Date: " + year + "    Rating: " + rank;
+			String theString =  "";
+			if(actorName != null) {
+				theString += "Actor: " + actorName + "    ";
+			}
+			if(actorID != null) {
+				theString += "ID: " + actorID + "    ";
+			}
+			
+			theString += "Result#: " + n + "    Title: " + title + "    Release Date: " + year + "    Rating: " + rank + "    Votes: " + votes;
+			
 			if(genre != null) {
 				theString += "    Genre: " + genre;
+			}
+			if(actorID != null) {
+				theString += "    ID: " + actorID;
+			}
+			if(actorName != null) {
+				theString += "    Actor: " + actorName;
+			}
+			if(pc != null) {
+				theString += "    Production Company: " + pc;
 			}
 			return theString;
 		}
