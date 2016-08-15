@@ -194,7 +194,7 @@ public class yamDB {
 		JPanel innerPan3 = new JPanel();
 		innerPan3.setBackground(Color.white);
 		innerPan3.setLayout(new BoxLayout(innerPan3, BoxLayout.X_AXIS));	
-		JLabel actorlb = new JLabel("Actor's Name  ");
+		JLabel actorlb = new JLabel("Actor's Name (Last, First)  ");
 		myJtxtFieldActor = new JTextField();
 		innerPan3.add(actorlb);
 		actorlb.setToolTipText("Actor's Name: Last, First");
