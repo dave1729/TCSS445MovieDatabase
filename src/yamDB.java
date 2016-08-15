@@ -681,6 +681,7 @@ public class yamDB {
 									double avg = (1.0 * totalRating) / numberTitles;
 									avg = Math.round(avg * 100) / 100.0;
 									myModel.addElement("TOTALS FOR ABOVE COMPANY --->    Name: " + previousPC + "   Average Rating: " + avg + " over " + numberTitles + " titles.");
+									myModel.addElement("\n");
 									//and start next set if this isn't the terminator title (telling us we are done)
 									if(!eachTitle.getPC().equals("?")) {
 										previousPC = eachTitle.getPC();
