@@ -873,8 +873,11 @@ public class yamDB {
 			if(actorID != null) {
 				theString += "ID: " + actorID + "    ";
 			}
+			if(n != 0) {
+				theString += "Result#: " + n + "    ";
+			}
 			
-			theString += "Result#: " + n + "    Title: " + title + "    Release Date: " + year + "    Rating: " + rank + "    Votes: " + votes;
+			theString += "Title: " + title + "    Release Date: " + year + "    Rating: " + rank + "    Votes: " + votes;
 			
 			if(genre != null) {
 				theString += "    Genre: " + genre;
