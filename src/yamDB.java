@@ -23,16 +23,16 @@ import javax.swing.UIManager;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.ButtonGroup;
-import javax.swing.ButtonModel;
 import javax.swing.DefaultListModel;
-import javax.swing.border.EmptyBorder;
-import javax.swing.plaf.ColorUIResource;
+
 
 //import yamDB.Title; remove this 
 
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.FocusEvent;
+import java.awt.event.FocusListener;
 import java.awt.event.KeyEvent;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -44,7 +44,7 @@ import java.util.Random;
 
 public class yamDB {
 	
-	private static final int MAX_ROULETTE_CHOICE_RANGE = 100000;//(in titles)
+	private static final int MAX_ROULETTE_CHOICE_RANGE = 1000;//(in titles)
 	private static final int QUERY_MAX_TIME = 90; //(in seconds)
 
 	private JFrame frame;
@@ -61,7 +61,6 @@ public class yamDB {
 	private JComboBox<String> myGenre;
 	private JButton myButtonSearch;
 	private DefaultListModel<String> myModel;
-	private JMenuBar myMenuBar;
 
 	/**
 	 * Launch the application.
@@ -98,7 +97,7 @@ public class yamDB {
 	private void initialize() {
 		frame = new JFrame("Yet Another Movie Database");
 		
-		frame.setBounds(100, 100, 900, 700);
+		frame.setBounds(160, 0, 900, 695);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		JPanel panel = new JPanel();
 		panel.setBackground(Color.white);
@@ -160,12 +159,17 @@ public class yamDB {
 		public void actionPerformed(ActionEvent e) {
 		    ;
 		}*/
-		
+		JPanel innerPan0 = new JPanel();
+		innerPan0.setBackground(Color.white);
+		innerPan0.setLayout(new BoxLayout(innerPan0, BoxLayout.X_AXIS));
+		JLabel instructionLabel = new JLabel("Leave boxes blank to not limit search criteria (large searches can take up to 20 sec)");
+		innerPan0.add(instructionLabel);
 		
 		//search by movie title
 		JPanel innerPan = new JPanel();
 		innerPan.setBackground(Color.white);
 		innerPan.setLayout(new BoxLayout(innerPan, BoxLayout.X_AXIS));
+
 		JLabel lb1 = new JLabel("Movie Title  ");
 		myJtxtFieldNameOrPC = new JTextField();
 		innerPan.add(lb1);
@@ -196,7 +200,7 @@ public class yamDB {
 		actorlb.setToolTipText("Actor's Name: Last, First");
 		innerPan3.add(myJtxtFieldActor);
 		myJtxtFieldActor.setEnabled(false);
-
+		
 		//rating From
 		JPanel innerPan4 = new JPanel();
 		innerPan4.setBackground(Color.white);
@@ -257,6 +261,31 @@ public class yamDB {
 		myJtxtFieldNameOrPC.addActionListener(handler);
 		myJtxtFieldYearFrom.addActionListener(handler);
 		innerPan6.add(myButtonSearch,BorderLayout.CENTER);
+		myJtxtFieldNameOrPC.addFocusListener(new FocusListener(){
+
+			@Override
+			public void focusGained(FocusEvent arg0) {
+				myJtxtFieldActor.setText("");
+			}
+
+			@Override
+			public void focusLost(FocusEvent arg0) {
+				// do nothing
+			}
+        });
+		
+		myJtxtFieldActor.addFocusListener(new FocusListener(){
+			
+			@Override
+			public void focusGained(FocusEvent arg0) {
+				myJtxtFieldNameOrPC.setText("");
+			}
+
+			@Override
+			public void focusLost(FocusEvent arg0) {
+				// do nothing
+			}
+        });
 		
 		myRouleteButton.addActionListener(new ActionListener() {
 	        @Override
@@ -311,7 +340,9 @@ public class yamDB {
 		c.insets = new Insets(0,0,0,40);	
 		
 		infoPan.add(innerPan1);
-		infoPan.add(Box.createVerticalStrut(20));
+		infoPan.add(Box.createVerticalStrut(10));
+		infoPan.add(innerPan0);
+		infoPan.add(Box.createVerticalStrut(10));
 		infoPan.add(innerPan);
 		infoPan.add(Box.createVerticalStrut(20));
 		infoPan.add(innerPan2);
@@ -378,7 +409,16 @@ public class yamDB {
 		menuHELP.setMnemonic(KeyEvent.VK_H);
 		menuHELP.addActionListener(new ActionListener() {
 	            public void actionPerformed(final ActionEvent theEvent) {
-	                JOptionPane.showMessageDialog(null,"What is YAMBD?", "Help",
+	            	String helpMessage = "Yet Another Movie Database (YAMBD) is yet another movie database! (we know you were looking for another one).\n\n" +
+   						 				 "We aim to give users the chance to sort through some of IMDB's databases\n" +
+   						 				 "and hopefully discover some information not easily obtained on IMDB's Website.\n\n" +
+   						 				 "You will see at the top we have three features currently avaliable: SEARCH, ROULETTE, and PREDICT!\n\n" +
+   						 				 "SEARCH - Allows you to create lists of movies based on specific search criteria, ratings, years, genre.\n\n" +
+   						 				 "ROULETTE - Gives you the chance to have us select a random movie for you (given some search parameters).\n\n" +
+   						 				 "PREDICTOR - This feature gives you the opportunity to see average movie rankings for different actors or\n" +
+	            						 "production companies. Discover for yourself what average ratings the actors and companies that you know\n" +
+   						 				 "have over their lifetime and recent history.\n";
+	                JOptionPane.showMessageDialog(null, helpMessage, "Help",
 	                                                JOptionPane.INFORMATION_MESSAGE);
 	            }
 	        });
@@ -473,8 +513,18 @@ public class yamDB {
 				}
 				else if (myPredictorButton.isSelected()) {
 					
-					//Check For Any Views Here, if any views exist, drop them. (don't know if this check is possible or easy)
-					// TODO method stub
+					//Check For Any Views Here, if we have old views, drop them.
+					rs = myStmt.executeQuery("SELECT table_name FROM information_schema.tables WHERE table_name = 'MyActor'");
+					//Create Drop Statement, if we created a view earlier
+					if(rs.next()) {
+						System.out.print("Deleting MyActor");
+						myStmt.execute("DROP VIEW MyActor;");
+					}
+					rs = myStmt.executeQuery("SELECT table_name FROM information_schema.tables WHERE table_name = 'MyPC'");
+					if (rs.next()) {
+						System.out.print("Deleting MyPC");
+						myStmt.execute("DROP VIEW MyPC;");
+					}
 					
 					//Create View Statement
 					String manipulationStatement = "";
