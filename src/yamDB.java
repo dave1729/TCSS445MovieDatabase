@@ -44,7 +44,7 @@ import java.util.Random;
 
 public class yamDB {
 	
-	private static final int MAX_ROULETTE_CHOICE_RANGE = 1000;//(in titles)
+	private static final int MAX_ROULETTE_CHOICE_RANGE = 10000;//(in titles)
 	private static final int QUERY_MAX_TIME = 90; //(in seconds)
 
 	private JFrame frame;
